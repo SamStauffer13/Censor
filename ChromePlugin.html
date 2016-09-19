@@ -1,0 +1,97 @@
+<!doctype html>
+
+<html>
+
+<head>
+    <link rel="shortcut icon" type="image/png" href="Jasmine/lib/jasmine-2.4.1/jasmine_favicon.png">
+    <link rel="stylesheet" href="Jasmine/lib/jasmine-2.4.1/jasmine.css">
+    <script src="Jasmine/lib/jasmine-2.4.1/jasmine.js"></script>
+    <script src="Jasmine/lib/jasmine-2.4.1/jasmine-html.js"></script>
+    <script src="Jasmine/lib/jasmine-2.4.1/boot.js"></script>
+</head>
+
+<body>
+
+    <script> 
+    'use strict';
+
+    class DataAccess
+    {
+        constructor()
+        {
+            this.storageKey = "WRP";
+        }
+
+        GetSettings()
+        {
+            let settings = localStorage.getItem(this.storageKey);
+
+            try
+            {
+                if(settings != 'null') // whatttt
+                {
+                      return JSON.parse(settings);
+                }
+            }
+            catch(error)
+            {
+                console.error(`${error.message} while parsing: ${settings}.`);
+            }
+
+            return { "donald trump" : "mad scientist" };
+        }
+    }
+
+    describe("Unit Test : ", function(){
+
+        let sut;
+        beforeEach(() => { sut = new DataAccess(); });
+
+        it("Plugin will retrive user settings stored on the client", function(){
+
+            // arrange
+            let expectedSettings = { "this word" : "that word" };
+            localStorage.setItem("WRP", JSON.stringify(expectedSettings));
+            // act 
+            let actualSettings = sut.GetSettings();
+            // assert
+            expect(actualSettings).toEqual(expectedSettings); 
+
+        });
+
+        describe("Plugin will return default settings if settings on the client return:", function(){
+
+            it("empty string", function(){
+                // arrange
+                localStorage.setItem("WRP", '');
+                // act 
+                let result = sut.GetSettings();
+                // assert
+                expect(result).toEqual( {"donald trump" : "mad scientist"} ); 
+            });
+
+            it("null", function(){
+                // arrange
+                localStorage.setItem("WRP", null);
+                // act 
+                let result = sut.GetSettings();
+                // assert
+                expect(result).toEqual( {"donald trump" : "mad scientist"} ); 
+            });
+
+            it("invalid json", function(){
+                // arrange
+                localStorage.setItem("WRP", '{');
+                // act 
+                let result = sut.GetSettings();
+                // assert
+                expect(result).toEqual( {"donald trump" : "mad scientist"} ); 
+            });
+        });
+    });
+
+</script>
+
+</body>
+
+</html>
