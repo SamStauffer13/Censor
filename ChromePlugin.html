@@ -15,11 +15,37 @@
     <script> 
     'use strict';
 
-    class DataAccess
+    class SettingsService
+    {
+        constructor(SettingsDataAccess)
+        {
+            this.db = SettingsDataAccess;
+        }
+
+        ApplySettings()
+        {
+            // gets settings from db and applies them
+            var settings = db.GetSettings();
+        }
+
+        DisplaySettings()
+        {
+            // gets settings from db and displays them
+            // sets listener that would trigger save then apply
+        }
+
+        SaveSettings()
+        {
+            // gets settings from dom and saves settings to db
+        }
+    }
+
+    class SettingsDataAccess
     {
         constructor()
-        {
+        {            
             this.storageKey = "WRP";
+            this.defaultSettings = { "donald trump" : "mad scientist" }; 
         }
 
         GetSettings()
@@ -27,28 +53,30 @@
             let settings = localStorage.getItem(this.storageKey);
 
             try
-            {
-                if(settings != 'null') // whatttt
-                {
-                      return JSON.parse(settings);
-                }
+            {                
+                let parsed = JSON.parse(settings); 
+                if (parsed && typeof parsed === 'object') return parsed;                
             }
             catch(error)
             {
-                console.error(`${error.message} while parsing: ${settings}.`);
+                console.error(`${error.message} while parsing: ${settings}`);
             }
 
-            return { "donald trump" : "mad scientist" };
+            return this.defaultSettings; 
+        }
+
+        UpdateSettings(settings)
+        {
+            localStorage.setItem("WRP", JSON.stringify(settings));
         }
     }
 
-    describe("Unit Test : ", function(){
+    describe("When using the settings data access class... ", function(){
 
         let sut;
-        beforeEach(() => { sut = new DataAccess(); });
+        beforeEach(() => { sut = new SettingsDataAccess(); });
 
-        it("Plugin will retrive user settings stored on the client", function(){
-
+        it("user settings will be returned if available", function(){
             // arrange
             let expectedSettings = { "this word" : "that word" };
             localStorage.setItem("WRP", JSON.stringify(expectedSettings));
@@ -56,39 +84,44 @@
             let actualSettings = sut.GetSettings();
             // assert
             expect(actualSettings).toEqual(expectedSettings); 
-
         });
 
-        describe("Plugin will return default settings if settings on the client return:", function(){
-
-            it("empty string", function(){
-                // arrange
-                localStorage.setItem("WRP", '');
-                // act 
-                let result = sut.GetSettings();
-                // assert
-                expect(result).toEqual( {"donald trump" : "mad scientist"} ); 
-            });
-
-            it("null", function(){
-                // arrange
-                localStorage.setItem("WRP", null);
-                // act 
-                let result = sut.GetSettings();
-                // assert
-                expect(result).toEqual( {"donald trump" : "mad scientist"} ); 
-            });
-
-            it("invalid json", function(){
-                // arrange
-                localStorage.setItem("WRP", '{');
-                // act 
-                let result = sut.GetSettings();
-                // assert
-                expect(result).toEqual( {"donald trump" : "mad scientist"} ); 
-            });
+        it("default settings will be returned if user settings are empty", function(){
+            // arrange
+            localStorage.setItem("WRP", '');
+            // act 
+            let result = sut.GetSettings();
+            // assert
+            expect(result).toEqual( {"donald trump" : "mad scientist"} ); 
         });
-    });
+
+        it("default settings will be returned if user settings are null", function(){
+            // arrange
+            localStorage.setItem("WRP", null);
+            // act 
+            let result = sut.GetSettings();
+            // assert
+            expect(result).toEqual( {"donald trump" : "mad scientist"} ); 
+        });
+
+        it("default settings will be returned if user settings are invalid json", function(){
+            // arrange
+            localStorage.setItem("WRP", '{');
+            // act 
+            let result = sut.GetSettings();
+            // assert
+            expect(result).toEqual( {"donald trump" : "mad scientist"} ); 
+        });
+
+        it("default settings will be returned if user settings not a JSON object", function(){
+            // arrange
+            localStorage.setItem("WRP", 9);
+            // act 
+            let result = sut.GetSettings();
+            // assert
+            expect(result).toEqual( {"donald trump" : "mad scientist"} ); 
+        });        
+    });    
 
 </script>
 
