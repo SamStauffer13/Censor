@@ -24,12 +24,27 @@
 
         ApplySettings()
         {                        
+            let start = performance.now();
+
             let settings = this.db.GetSettings(), element, ent = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT);
             
             while (element = ent.nextNode())
             {
                 Object.keys(settings).forEach(word => { element.nodeValue = element.nodeValue.replace(word, settings[word]); }); 
             }
+            
+            var observer = new MutationObserver(function(mutations) {
+                mutations.forEach(function(mutation) {
+
+                    // console.log(mutation, mutation.type);                    
+                });    
+            });            
+            
+            observer.observe(document.body, { attributes: true, subtree: true, childList: true, characterData: true });
+
+            let end = performance.now();
+
+            console.info(`plugin took ${end - start} ms to execute`);
         }
 
         DisplaySettings()
