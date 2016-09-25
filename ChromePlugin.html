@@ -15,6 +15,16 @@
     <script> 
     'use strict';
 
+    it("pressing the browser icon will open the interface");
+
+    it("pressing the browser icon again will close the interface");
+
+    it("interface should give adequate props to Marat for supplying the attack helicopter icon");
+
+    it("user setting will marquee accross the page...");
+
+    it("clicking on a user setting will populate the settings form");
+
     class SettingsService
     {
         constructor(SettingsDataAccess)
@@ -58,8 +68,8 @@
             // gets settings from dom and saves settings to db
         }
     }
-
-    // integration tests, will be refactored into more concise documentation once all test are passing...
+    
+    // integration tests are for the User, will be refactored into more concise documentation once all test are passing...
     describe("When Applying User Settings, ", function(){
 
         let sut, mockedDataAccess;
@@ -122,6 +132,20 @@
 
             div.remove();            
         });
+
+        describe("the plugin will recursively utilize keywords to modify a page's contents", function () {
+
+            it("the plugin will modify a page's contents regardless of capitolization or plurlization");
+
+            it("Words like THE and A will be ignored");
+
+            it("The first word in a sequence will take presidence in aggressive mode.", function(){
+
+                pending();
+                // take the first word and the content after it, if the content after it contains the second word, replace the whole string...
+
+            });
+        });
     });    
 
     class SettingsDataAccess
@@ -143,7 +167,7 @@
             }
             catch(error)
             {
-                console.error(`${error.message} while parsing: ${settings}`);
+                console.warn(`${error.message} while parsing: ${settings}`);
             }
 
             return this.defaultSettings; 
@@ -155,6 +179,7 @@
         }
     }
 
+    // Unit tests are for the Developer
     describe("When using the settings data access class... ", function(){
 
         let sut;
