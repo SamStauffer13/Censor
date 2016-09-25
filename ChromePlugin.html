@@ -23,9 +23,13 @@
         }
 
         ApplySettings()
-        {
-            // gets settings from db and applies them            
-            var settings = this.db.GetSettings();           
+        {                        
+            let settings = this.db.GetSettings(), element, ent = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT);
+            
+            while (element = ent.nextNode())
+            {
+                Object.keys(settings).forEach(word => { element.nodeValue = element.nodeValue.replace(word, settings[word]); }); 
+            }
         }
 
         DisplaySettings()
@@ -40,38 +44,68 @@
         }
     }
 
-    describe("When Applying User Settings", function(){
+    // integration tests, will be refactored into more concise documentation once all test are passing...
+    describe("When Applying User Settings, ", function(){
 
-        let sut;
-        let mockedDataAccess;
+        let sut, mockedDataAccess;
         beforeEach(() => { 
             mockedDataAccess = new SettingsDataAccess();
             sut = new SettingsService(mockedDataAccess); 
         });
 
-        it("Should replace this with that", function(){
-        // arrange
-        let word = 'fire ants'; 
-        let definition = 'spicy boys'; // support the cause: https://goo.gl/6Rl20I
+        it("our plugin will replace any word on a web page with a word defined in its settings", function(){
+            // arrange
+            let word = 'fire ants'; 
+            let definition = 'spicy boys'; // support the cause: https://goo.gl/6Rl20I
 
-        mockedDataAccess.GetSettings = () => { return { word : definition }; }
+            // Learned: es5 doesn't allow variable property names in object literals, es6 does with ComputedPropertyNames (dem square brackets doh)
+            mockedDataAccess.GetSettings = () => { return { [word] : definition }; }
 
-        let div = document.createElement("div");
-        let span = document.createElement("span");
+            let div = document.createElement("div");
+            let span = document.createElement("span");
 
-        span.innerHTML = `bla bla bla ${word} bla bla bla`;
+            span.innerHTML = `bla bla bla ${word} bla bla bla`;
 
-        div.appendChild(span);
-        document.body.appendChild(div);
+            div.appendChild(span);
+            document.body.appendChild(div);
 
-        // act
-        sut.ApplySettings();
+            // act
+            sut.ApplySettings();
 
-        // assert
-        expect(span.innerHTML).toEqual(`bla bla bla ${definition} bla bla bla`);
+            // assert
+            expect(span.innerHTML).toEqual(`bla bla bla ${definition} bla bla bla`);
 
-        div.remove();
+            div.remove();
+        });
 
+        it("the plugin will automatically modify ajaxed content", function(){
+
+            // use a mutation observer https://goo.gl/iBc25q
+
+            // arrange (copied from above)
+            let word = 'fire ants'; 
+            let definition = 'spicy boys'; 
+
+            mockedDataAccess.GetSettings = () => { return { [word] : definition }; }
+
+            let div = document.createElement("div");
+            let span = document.createElement("span");
+
+            span.innerHTML = `bla bla bla ${word} bla bla bla`;
+
+            div.appendChild(span);
+            document.body.appendChild(div);
+
+            // act
+            sut.ApplySettings();
+
+            // BOOM the dom was changed AFTER the plugin ran...
+            span.innerHTML = `bla bla bla ${word} bla bla bla`;
+
+            // assert
+            expect(span.innerHTML).toEqual(`bla bla bla ${definition} bla bla bla`);
+
+            div.remove();            
         });
     });    
 
