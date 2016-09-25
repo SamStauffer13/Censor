@@ -18,14 +18,14 @@
     class SettingsService
     {
         constructor(SettingsDataAccess)
-        {
+        {  
             this.db = SettingsDataAccess;
         }
 
         ApplySettings()
         {
-            // gets settings from db and applies them
-            var settings = db.GetSettings();
+            // gets settings from db and applies them            
+            var settings = this.db.GetSettings();           
         }
 
         DisplaySettings()
@@ -39,6 +39,41 @@
             // gets settings from dom and saves settings to db
         }
     }
+
+    describe("When Applying User Settings", function(){
+
+        let sut;
+        let mockedDataAccess;
+        beforeEach(() => { 
+            mockedDataAccess = new SettingsDataAccess();
+            sut = new SettingsService(mockedDataAccess); 
+        });
+
+        it("Should replace this with that", function(){
+        // arrange
+        let word = 'fire ants'; 
+        let definition = 'spicy boys'; // support the cause: https://goo.gl/6Rl20I
+
+        mockedDataAccess.GetSettings = () => { return { word : definition }; }
+
+        let div = document.createElement("div");
+        let span = document.createElement("span");
+
+        span.innerHTML = `bla bla bla ${word} bla bla bla`;
+
+        div.appendChild(span);
+        document.body.appendChild(div);
+
+        // act
+        sut.ApplySettings();
+
+        // assert
+        expect(span.innerHTML).toEqual(`bla bla bla ${definition} bla bla bla`);
+
+        div.remove();
+
+        });
+    });    
 
     class SettingsDataAccess
     {
