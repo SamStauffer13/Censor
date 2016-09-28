@@ -30,31 +30,29 @@
         constructor(SettingsDataAccess)
         {  
             this.db = SettingsDataAccess;
+            this.count = 1;
         }
 
         ApplySettings()
-        {                        
+        {
+            // todo prevent multiple instances of this class from being instantiated 
+            
+                        
             let start = performance.now();
-
-            let settings = this.db.GetSettings(), element, ent = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT);
             
-            while (element = ent.nextNode())
+            let settings = this.db.GetSettings(), textNodeOnPage, ent = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT);
+            
+            while (textNodeOnPage = ent.nextNode())
             {
-                Object.keys(settings).forEach(word => { element.nodeValue = element.nodeValue.replace(word, settings[word]); }); 
+                // todo research better way to loop through key / value object
+                Object.keys(settings).forEach( word => { textNodeOnPage.nodeValue = textNodeOnPage.nodeValue.replace(word, settings[word]); }); 
             }
+
+            console.info(`plugin took ${performance.now() - start} ms to execute on try number ${this.count++}`);                        
+
+            if (this.observer) return; // prevents recursion hell            
             
-            var observer = new MutationObserver(function(mutations) {
-                mutations.forEach(function(mutation) {
-
-                    // console.log(mutation, mutation.type);                    
-                });    
-            });            
-            
-            observer.observe(document.body, { attributes: true, subtree: true, childList: true, characterData: true });
-
-            let end = performance.now();
-
-            console.info(`plugin took ${end - start} ms to execute`);
+            this.observer = new MutationObserver( mutations => { this.ApplySettings(); }).observe(document.body, { subtree: true, childList: true });            
         }
 
         DisplaySettings()
@@ -125,19 +123,19 @@
             sut.ApplySettings();
 
             // BOOM the dom was changed AFTER the plugin ran...
-            span.innerHTML = `bla bla bla ${word} bla bla bla`;
+            span.innerHTML = `bla bla bla ${word} bla bla bla`;            
 
-            // assert
-            expect(span.innerHTML).toEqual(`bla bla bla ${definition} bla bla bla`);
+            // assert this is either executing  too quickly or we need to retrieve the dom element again...       
+            expect(span.innerHTML).toEqual(`bla bla bla ${definition} bla bla bla`);        
 
-            div.remove();            
+            div.remove();
         });
 
         describe("the plugin will recursively utilize keywords to modify a page's contents", function () {
 
             it("the plugin will modify a page's contents regardless of capitolization or plurlization");
 
-            it("Words like THE and A will be ignored");
+            it("English determiners will be ignored");
 
             it("The first word in a sequence will take presidence in aggressive mode.", function(){
 
