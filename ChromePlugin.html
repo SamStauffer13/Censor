@@ -30,60 +30,75 @@
         constructor(SettingsDataAccess)
         {  
             this.db = SettingsDataAccess;
-            this.count = 1;
+            this.timesInvoked = 1;
+
+            // // todo the icon and the content script js are usually independent js files that are loaded independently via the manifest.... 
+            // chrome.browserAction.onClicked.addListener(function () {
+            //     chrome.tabs.query({ active: true, currentWindow: true }, function (tabs) {
+
+            //         // chrome.tabs.sendMessage(tabs[0].id, { applySettings: "true" }, function (response) {
+            //         chrome.tabs.sendMessage(tabs[0].id, { displaySettings: "true" }, function (response) {
+
+
+            //         });
+            //     });
+            // }); 
+            
+            // chrome.runtime.onMessage.addListener( (request, sender, sendResponse) => { if (request.applySettings) this.ApplySettings(); });
+            // chrome.runtime.onMessage.addListener( (request, sender, sendResponse) => { if (request.displaySettings) this.DisplaySettings(); });
+
+            this.ApplySettings(); 
+
+            // todo pass in relevant mutant nodes ( exluding our UI nodes ) instead of entire document body 
+            new MutationObserver( mutations => { this.ApplySettings();  }).observe(document.body, { subtree: true, childList: true }); 
         }
 
-        ApplySettings()
+        ApplySettings(domToParse = document.body)
         {
-            // todo prevent multiple instances of this class from being instantiated         
             let start = performance.now();
             
-            // todo this can be made more efficent by only traversing the nodes that we know have changed instead of the entire document...
-            let settings = this.db.GetSettings(), textNodeOnPage, ent = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT);
+            let settings = this.db.GetSettings(), textNodeOnPage, ent = document.createTreeWalker(domToParse, NodeFilter.SHOW_TEXT);
             
             while (textNodeOnPage = ent.nextNode())
             {
-                // todo research better way to loop through key / value object
                 Object.keys(settings).forEach( word => { textNodeOnPage.nodeValue = textNodeOnPage.nodeValue.replace(word, settings[word]); }); 
             }
 
             // todo remove this once testing is complete
-            console.info(`plugin took ${performance.now() - start} ms to execute on try number ${this.count++}`);                        
-
-            if (this.observer) return; // prevents recursion hell            
-            
-            this.observer = new MutationObserver( mutations => { this.ApplySettings(); }).observe(document.body, { subtree: true, childList: true });            
+            console.info(`plugin took ${performance.now() - start} ms to execute on try #${this.timesInvoked++}`);            
         }
 
-        DisplaySettings()
+        DisplaySettings(hideMenu)
         {
-            // gets settings from db and displays them
+            // if its already displaying on the page and this is called, then hide it
+
+            // if it exists on the plugin, show it 
+
+            // else get settings from db and build it
+            let marquee = document.createElement("marquee");
+            marquee.addEventListener("click", this.SaveSettings());
+
             // sets listener that would trigger save then apply
+            let saveButton = document.createElement("button");
+            saveButton.addEventListener("click", this.SaveSettings());
         }
 
         SaveSettings()
         {
-            // gets settings from dom and saves settings to db
+            // gets settings from dom and pushes to plugin storage
+
+            // gets from plugin storage and saves settings to db
         }
     }
     
     // integration tests are for the User, will be refactored into more concise documentation once all test are passing...
     describe("When Applying User Settings, ", function(){
 
-        let sut, mockedDataAccess;
-        beforeEach(() => { 
-            mockedDataAccess = new SettingsDataAccess();
-            sut = new SettingsService(mockedDataAccess); 
-        });
-
         it("our plugin will replace any word on a web page with a word defined in its settings", function(){
             // arrange
             let word = 'fire ants'; 
             let definition = 'spicy boys'; // support the cause: https://goo.gl/6Rl20I
-
-            // Learned: es5 doesn't allow variable property names in object literals, es6 does with ComputedPropertyNames (dem square brackets doh)
-            mockedDataAccess.GetSettings = () => { return { [word] : definition }; }
-
+            
             let div = document.createElement("div");
             let span = document.createElement("span");
 
@@ -92,8 +107,11 @@
             div.appendChild(span);
             document.body.appendChild(div);
 
+            let fakeDataAccess = new SettingsDataAccess();            
+            fakeDataAccess.GetSettings = () => { return { [word] : definition }; }
+            
             // act
-            sut.ApplySettings();
+            let plugin = new SettingsService(fakeDataAccess);
 
             // assert
             expect(span.innerHTML).toEqual(`bla bla bla ${definition} bla bla bla`);
@@ -103,13 +121,11 @@
 
         it("the plugin will automatically modify ajaxed content", function(){
 
-            // use a mutation observer https://goo.gl/iBc25q
+            // uses a mutation observer https://goo.gl/iBc25q
 
             // arrange (copied from above)
             let word = 'fire ants'; 
-            let definition = 'spicy boys'; 
-
-            mockedDataAccess.GetSettings = () => { return { [word] : definition }; }
+            let definition = 'spicy boys';
 
             let div = document.createElement("div");
             let span = document.createElement("span");
@@ -119,13 +135,16 @@
             div.appendChild(span);
             document.body.appendChild(div);
 
+            let fakeDataAccess = new SettingsDataAccess();            
+            fakeDataAccess.GetSettings = () => { return { [word] : definition }; }
+            
             // act
-            sut.ApplySettings();
+            let plugin = new SettingsService(fakeDataAccess);
 
             // BOOM the dom was changed AFTER the plugin ran...
             span.innerHTML = `bla bla bla ${word} bla bla bla`;            
 
-            // assert this is either executing  too quickly or we need to retrieve the dom element again...       
+            // assert todo this is either executing too quickly or we need to retrieve the dom element again...       
             expect(span.innerHTML).toEqual(`bla bla bla ${definition} bla bla bla`);        
 
             div.remove();
