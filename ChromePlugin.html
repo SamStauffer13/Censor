@@ -35,11 +35,8 @@
             // // todo the icon and the content script js are usually independent js files that are loaded independently via the manifest.... 
             // chrome.browserAction.onClicked.addListener(function () {
             //     chrome.tabs.query({ active: true, currentWindow: true }, function (tabs) {
-
             //         // chrome.tabs.sendMessage(tabs[0].id, { applySettings: "true" }, function (response) {
             //         chrome.tabs.sendMessage(tabs[0].id, { displaySettings: "true" }, function (response) {
-
-
             //         });
             //     });
             // }); 
@@ -65,7 +62,7 @@
             }
 
             // todo remove this once testing is complete
-            console.info(`plugin took ${performance.now() - start} ms to execute on try #${this.timesInvoked++}`);            
+            console.info(`plugin took ${performance.now() - start} ms on execution #${this.timesInvoked++}`);            
         }
 
         DisplaySettings(hideMenu)
@@ -119,7 +116,7 @@
             div.remove();
         });
 
-        it("the plugin will automatically modify ajaxed content", function(){
+        it("the plugin will automatically modify ajaxed content", function(done){
 
             // uses a mutation observer https://goo.gl/iBc25q
 
@@ -128,9 +125,7 @@
             let definition = 'spicy boys';
 
             let div = document.createElement("div");
-            let span = document.createElement("span");
-
-            span.innerHTML = `bla bla bla ${word} bla bla bla`;
+            let span = document.createElement("span");            
 
             div.appendChild(span);
             document.body.appendChild(div);
@@ -142,12 +137,20 @@
             let plugin = new SettingsService(fakeDataAccess);
 
             // BOOM the dom was changed AFTER the plugin ran...
-            span.innerHTML = `bla bla bla ${word} bla bla bla`;            
+            span.innerHTML = `bla bla bla ${word} bla bla bla`;                       
+                        
+            // async assert
+            setTimeout(function(){
 
-            // assert todo this is either executing too quickly or we need to retrieve the dom element again...       
-            expect(span.innerHTML).toEqual(`bla bla bla ${definition} bla bla bla`);        
+                expect(span.innerHTML).toEqual(`bla bla bla ${definition} bla bla bla`);
 
-            div.remove();
+                done();
+                                
+                div.remove();
+
+             }, 100);
+
+             expect(true).toEqual(true);                                         
         });
 
         describe("the plugin will recursively utilize keywords to modify a page's contents", function () {
