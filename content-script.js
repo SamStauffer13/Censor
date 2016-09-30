@@ -7,7 +7,10 @@ class SettingsService
     constructor(SettingsDataAccess)
     {  
         this.db = SettingsDataAccess;
-        this.timesInvoked = 1;     
+
+        this.timesInvoked = 1;        
+
+        this.pluginID = "asdfsdafsadfsadfsdfsas";
         
         // chrome.runtime.onMessage.addListener( (request, sender, sendResponse) => { if (request.displaySettings) this.DisplaySettings(); });
 
@@ -21,6 +24,7 @@ class SettingsService
     {
         let start = performance.now();
         
+        // todo refactor this to use a map instead of key value object
         let settings = this.db.GetSettings(), ent = document.createTreeWalker(domToParse, NodeFilter.SHOW_TEXT);
         
         while (ent.nextNode())
@@ -34,11 +38,27 @@ class SettingsService
 
     DisplaySettings()
     {        
-        // if its already displaying on the page and this is called, then hide it
-        // if it exists on the plugin, show it 
-        // else get settings from db and build it
-        // let marquee = document.createElement("marquee");
-        // marquee.addEventListener("click", this.SaveSettings());
+        let popup = document.getElementById(this.pluginID);
+
+        if (popup)
+        {           
+            if (popup.style.visibility == "hidden") return popup.style.visibility = ""; // show
+
+            return popup.style.visibility = "hidden"; // hide
+        }         
+
+        // let settingsFromDb = db.GetSettings(); 
+        // let settings = Object.keys(settingsFromDb).forEach( word => { `<marquee style="display:block;"> ${word} is a ${settingsFromDb[word]} </marquee>` });        
+        // let settingsInput = `<div style=""> <input style="" value=""/> is a <input style="" value=""/> </div>`;
+        // let saveButton = `<button style=""> Stay Strange </button>`;
+
+        popup = document.createElement("div");
+
+        let popupStyles = "opacity: 0.8;background-color: dimgrey;position: fixed;width: 100%;height: 100%;top: 0px;left: 0px;z-index: 1000;text-align: center;vertical-align: middle;font-weight: bold;font-size: 50px;color: white;";
+        popup.innerHTML = `<div id=${this.pluginID} style="${popupStyles}"> Hello World! </div>`;
+              
+        document.body.appendChild(popup);
+
         // sets listener that would trigger save then apply
         // let saveButton = document.createElement("button");
         // saveButton.addEventListener("click", this.SaveSettings());
@@ -80,7 +100,7 @@ class SettingsDataAccess
     {
         localStorage.setItem("WRP", JSON.stringify(settings));
     }
-}  
+}
 
 // let plugin = new SettingsService(new SettingsDataAccess());
 // chrome.runtime.onMessage.addListener( (request, sender, sendResponse) => { if (request.displaySettings) plugin.DisplaySettings(); });
