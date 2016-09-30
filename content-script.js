@@ -21,20 +21,19 @@ class SettingsService
     {
         let start = performance.now();
         
-        let settings = this.db.GetSettings(), textNodeOnPage, ent = document.createTreeWalker(domToParse, NodeFilter.SHOW_TEXT);
+        let settings = this.db.GetSettings(), ent = document.createTreeWalker(domToParse, NodeFilter.SHOW_TEXT);
         
-        while (textNodeOnPage = ent.nextNode())
+        while (ent.nextNode())
         {
-            Object.keys(settings).forEach( word => { textNodeOnPage.nodeValue = textNodeOnPage.nodeValue.replace(word, settings[word]); }); 
+            Object.keys(settings).forEach( word => { ent.currentNode.nodeValue = ent.currentNode.nodeValue.replace(word, settings[word]); }); 
         }
 
         // todo remove this once testing is complete
         console.info(`plugin took ${performance.now() - start} ms on execution #${this.timesInvoked++}`);            
     }
 
-    DisplaySettings(hideMenu)
-    {
-        console.log("displaying...");
+    DisplaySettings()
+    {        
         // if its already displaying on the page and this is called, then hide it
         // if it exists on the plugin, show it 
         // else get settings from db and build it
@@ -48,7 +47,6 @@ class SettingsService
     SaveSettings()
     {
         // gets settings from dom and pushes to plugin storage
-
         // gets from plugin storage and saves settings to db
     }
 }   

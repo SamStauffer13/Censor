@@ -1,4 +1,4 @@
-// todo, use package.json to pull in jasmine instead of c/p'd files
+// todo, use package.json to pull in jasmine instead of c/p'd files - reason is, we'll be pulling in babel and web pack via this method anyways, no reason to be inconsistent
 
 describe("When applying user settings, ", function(){
 
@@ -28,7 +28,7 @@ describe("When applying user settings, ", function(){
         div.remove();
     });
 
-    it("the plugin will automatically modify ajaxed content", function(done){
+    it("the plugin will automatically replace words added after page load", function(done){
 
         // uses a mutation observer https://goo.gl/iBc25q
 
@@ -77,19 +77,16 @@ describe("When applying user settings, ", function(){
 
 describe("When displaying user settings,", function(){
 
-    it("pressing the browser icon will open the interface");
+    it("clicking on the browser icon will open the interface");
 
-    it("pressing the browser icon again will close the interface");
-
-    it("interface should give adequate props to Marat for supplying the attack helicopter icon");
-
-    it("user setting will marquee accross the page...");
+    it("clicking on the browser icon again will close the interface");    
 
     it("clicking on a user setting will populate the settings form");
 
+    it("interface should give adequate props to Marat for supplying the attack helicopter icon");
 });
 
-describe("When saving user settings", function(){
+describe("When saving user settings,", function(){
 
 });
 
