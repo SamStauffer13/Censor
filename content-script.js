@@ -11,14 +11,16 @@ class SettingsService
         this.timesInvoked = 1;        
 
         this.pluginKey = "2646C6BD6CCCCF9947F69EF256CA8";
-        this.saveButtonKey = '8F2C924C61BA96CBAB68E3CB2DA44';
+        this.saveButtonKey = "8F2C924C61BA96CBAB68E3CB2DA44";
+        this.marqueeKey = "A3EC18473FC9AD6A41BA384C61C77"        
         
-        // chrome.runtime.onMessage.addListener( (request, sender, sendResponse) => { if (request.displaySettings) this.DisplaySettings(); });
-
         this.ApplySettings(); 
 
-        // todo pass in relevant mutant nodes ( exluding our UI nodes ) instead of entire document body 
-        new MutationObserver( mutations => { this.ApplySettings();  }).observe(document.body, { subtree: true, childList: true }); 
+        // todo: pass in chrome API as dependency and fake it in the unit tests 
+        if(chrome.runtime.onMessage) chrome.runtime.onMessage.addListener( (request, sender, sendResponse) => { if (request.displaySettings) plugin.DisplaySettings(); });
+
+        // todo: pass in relevant mutant nodes ( exluding our UI nodes ) instead of entire document body 
+        new MutationObserver( mutations => { this.ApplySettings();  }).observe(document.body, { subtree: true, childList: true });
     }
 
     ApplySettings(domToParse = document.body)
@@ -32,7 +34,7 @@ class SettingsService
             Object.keys(settings).forEach( word => { ent.currentNode.nodeValue = ent.currentNode.nodeValue.replace(word, settings[word]); }); 
         }
 
-        //  console.info(`plugin took ${performance.now() - start} ms on execution #${this.timesInvoked++}`);            
+        console.info(`plugin took ${performance.now() - start} ms on execution #${this.timesInvoked++}`);            
     }
 
     DisplaySettings()
@@ -49,7 +51,8 @@ class SettingsService
         // todo: inject a stylesheet
         let styles = 
         {
-            mainDiv : `opacity:0.8;
+            popup : 
+            `opacity:0.8;
             background-color: dimgrey;
             position:fixed;
             width:100%;
@@ -62,7 +65,10 @@ class SettingsService
             font-weight:bold;
             font-size:50px;  
             color: white;  `,
-            saveButton : `margin-top: 100px;
+            marquee:
+            `display:block;`,
+            saveButton : 
+            `margin-top: 100px;
             background:none!important;
             border:none; 
             padding:0!important;
@@ -72,22 +78,23 @@ class SettingsService
             font-size: 100px;`
         }
 
-        let settingsFromDb = this.db.GetSettings();        
-        // let settings = Object.keys(settingsFromDb).forEach( word => { `<marquee style="display:block;"> ${word} is a ${settingsFromDb[word]} </marquee>` });
-        let settings = `<marquee style="display:block;"> :) </marquee>`;
+        let settingsFromDb = this.db.GetSettings(), marKey="", image="";        
+        let settings = Object.keys(settingsFromDb).forEach( word => { marKey += `<marquee id=${this.marqueeKey} style="${styles.marquee}"> ${word} is a ${settingsFromDb[word]} </marquee> `; });
         
+        if(chrome.extension) image = `<img src=${chrome.extension.getURL("/icon-large.png")}/>`;
+                
         popup = document.createElement("div");
-
-        popup.innerHTML = `<div id=${this.pluginKey} style="${styles.mainDiv}"> ${settings} <button id=${this.saveButtonKey} style="${styles.saveButton}"> :) </button> </div>`;
-              
+        popup.innerHTML = `<div id=${this.pluginKey} style="${styles.popup}"> ${marKey} ${image} <button id=${this.saveButtonKey} style="${styles.saveButton}"> :) </button> </div>`;              
         document.body.appendChild(popup);
 
-        document.getElementById(this.saveButtonKey).addEventListener("click", () => { this.SaveSettings(); });
+        document.getElementById(this.saveButtonKey).addEventListener("click", () => { this.SaveSettings(); });        
+        // document.getElementById(this.marqueeKey).addEventListener("click", () => { console.log("populated"); });
     }
 
     SaveSettings()
     {
-        console.log("saved..."); // gets settings from dom and pushes to plugin storage / gets from plugin storage and saves settings to db
+        let popup = document.getElementById(this.pluginKey);
+        return popup.style.visibility = "hidden"; // hide
     }
 }
 
@@ -96,7 +103,7 @@ class SettingsDataAccess
     constructor()
     {            
         this.storageKey = "7DCF8FAAC5ECB6FF17DF5487735A7";
-        this.defaultSettings = { "donald trump" : "mad scientist" }; // todo refactor this to use a map instead of key value object 
+        this.defaultSettings = {"Donald Trump" : "A Mad Scientist", "Hillary Clinton" : "A Six Foot Tall Giant Robot"}; // todo refactor this to use a map instead of key value object 
     }
 
     GetSettings()
@@ -121,6 +128,3 @@ class SettingsDataAccess
         localStorage.setItem(this.storageKey, JSON.stringify(settings));
     }
 }
-
-// let plugin = new SettingsService(new SettingsDataAccess());
-// chrome.runtime.onMessage.addListener( (request, sender, sendResponse) => { if (request.displaySettings) plugin.DisplaySettings(); });

@@ -67,12 +67,13 @@ describe("When applying user settings, ", function(){
 
     it("the plugin will ignore capitolization and plurlization");
 
-    it("the plugin will ignored English determiners like THE and A");
+    it("the plugin will ignore prefixs like Mr. and Mrs.");
+
+    it("the plugin will ignored english determiners like The and A");
 
     it("the plugin will recursively utilize keywords to modify a page's contents", function(){
         pending(); // take the first word and the content after it, if the content after it contains the second word, replace the whole string...
     });
-
 });
 
 describe("When displaying user settings,", function(){
@@ -95,7 +96,7 @@ describe("When displaying user settings,", function(){
         else
         {
             fail("user interface does not exist"); 
-        }  
+        }
     }); 
 
     it("clicking on the browser icon again will hide the interface", function(){
@@ -116,8 +117,8 @@ describe("When displaying user settings,", function(){
         else
         {
             fail("user interface does not exist"); 
-        }       
-    });    
+        }
+    });
 
     it("clicking on a user setting will populate the settings form");
 
@@ -149,7 +150,7 @@ describe("Developer documentation for the settings data access class", function(
         // act 
         let result = sut.GetSettings();
         // assert
-        expect(result).toEqual( {"donald trump" : "mad scientist"} ); 
+        expect(result).toEqual(sut.defaultSettings); 
     });
 
     it("default settings will be returned if user settings are null", function(){
@@ -158,7 +159,7 @@ describe("Developer documentation for the settings data access class", function(
         // act 
         let result = sut.GetSettings();
         // assert
-        expect(result).toEqual( {"donald trump" : "mad scientist"} ); 
+        expect(result).toEqual(sut.defaultSettings); 
     });
 
     it("default settings will be returned if user settings are invalid json", function(){
@@ -167,7 +168,7 @@ describe("Developer documentation for the settings data access class", function(
         // act 
         let result = sut.GetSettings();
         // assert
-        expect(result).toEqual( {"donald trump" : "mad scientist"} ); 
+        expect(result).toEqual(sut.defaultSettings); 
     });
 
     it("default settings will be returned if user settings not a JSON object", function(){
@@ -176,9 +177,6 @@ describe("Developer documentation for the settings data access class", function(
         // act 
         let result = sut.GetSettings();
         // assert
-        expect(result).toEqual( {"donald trump" : "mad scientist"} ); 
+        expect(result).toEqual(sut.defaultSettings); 
     });        
 });
-
-
-
