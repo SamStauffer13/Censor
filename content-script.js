@@ -10,7 +10,8 @@ class SettingsService
 
         this.timesInvoked = 1;        
 
-        this.pluginID = "asdfsdafsadfsadfsdfsas";
+        this.pluginKey = "2646C6BD6CCCCF9947F69EF256CA8";
+        this.saveButtonKey = '8F2C924C61BA96CBAB68E3CB2DA44';
         
         // chrome.runtime.onMessage.addListener( (request, sender, sendResponse) => { if (request.displaySettings) this.DisplaySettings(); });
 
@@ -24,7 +25,6 @@ class SettingsService
     {
         let start = performance.now();
         
-        // todo refactor this to use a map instead of key value object
         let settings = this.db.GetSettings(), ent = document.createTreeWalker(domToParse, NodeFilter.SHOW_TEXT);
         
         while (ent.nextNode())
@@ -32,13 +32,12 @@ class SettingsService
             Object.keys(settings).forEach( word => { ent.currentNode.nodeValue = ent.currentNode.nodeValue.replace(word, settings[word]); }); 
         }
 
-        // todo remove this once testing is complete
-        console.info(`plugin took ${performance.now() - start} ms on execution #${this.timesInvoked++}`);            
+        //  console.info(`plugin took ${performance.now() - start} ms on execution #${this.timesInvoked++}`);            
     }
 
     DisplaySettings()
     {        
-        let popup = document.getElementById(this.pluginID);
+        let popup = document.getElementById(this.pluginKey);
 
         if (popup)
         {           
@@ -47,36 +46,57 @@ class SettingsService
             return popup.style.visibility = "hidden"; // hide
         }         
 
-        // let settingsFromDb = db.GetSettings(); 
-        // let settings = Object.keys(settingsFromDb).forEach( word => { `<marquee style="display:block;"> ${word} is a ${settingsFromDb[word]} </marquee>` });        
-        // let settingsInput = `<div style=""> <input style="" value=""/> is a <input style="" value=""/> </div>`;
-        // let saveButton = `<button style=""> Stay Strange </button>`;
+        // todo: inject a stylesheet
+        let styles = 
+        {
+            mainDiv : `opacity:0.8;
+            background-color: dimgrey;
+            position:fixed;
+            width:100%;
+            height:100%;
+            top:0px;
+            left:0px;
+            z-index:1000;
+            text-align: center;
+            vertical-align: middle;
+            font-weight:bold;
+            font-size:50px;  
+            color: white;  `,
+            saveButton : `margin-top: 100px;
+            background:none!important;
+            border:none; 
+            padding:0!important;
+            font: inherit;    
+            color: inherit;
+            cursor: pointer;
+            font-size: 100px;`
+        }
 
+        let settingsFromDb = this.db.GetSettings();        
+        // let settings = Object.keys(settingsFromDb).forEach( word => { `<marquee style="display:block;"> ${word} is a ${settingsFromDb[word]} </marquee>` });
+        let settings = `<marquee style="display:block;"> :) </marquee>`;
+        
         popup = document.createElement("div");
 
-        let popupStyles = "opacity: 0.8;background-color: dimgrey;position: fixed;width: 100%;height: 100%;top: 0px;left: 0px;z-index: 1000;text-align: center;vertical-align: middle;font-weight: bold;font-size: 50px;color: white;";
-        popup.innerHTML = `<div id=${this.pluginID} style="${popupStyles}"> Hello World! </div>`;
+        popup.innerHTML = `<div id=${this.pluginKey} style="${styles.mainDiv}"> ${settings} <button id=${this.saveButtonKey} style="${styles.saveButton}"> :) </button> </div>`;
               
         document.body.appendChild(popup);
 
-        // sets listener that would trigger save then apply
-        // let saveButton = document.createElement("button");
-        // saveButton.addEventListener("click", this.SaveSettings());
+        document.getElementById(this.saveButtonKey).addEventListener("click", () => { this.SaveSettings(); });
     }
 
     SaveSettings()
     {
-        // gets settings from dom and pushes to plugin storage
-        // gets from plugin storage and saves settings to db
+        console.log("saved..."); // gets settings from dom and pushes to plugin storage / gets from plugin storage and saves settings to db
     }
-}   
+}
 
 class SettingsDataAccess
 {
     constructor()
     {            
-        this.storageKey = "WRP";
-        this.defaultSettings = { "donald trump" : "mad scientist" }; 
+        this.storageKey = "7DCF8FAAC5ECB6FF17DF5487735A7";
+        this.defaultSettings = { "donald trump" : "mad scientist" }; // todo refactor this to use a map instead of key value object 
     }
 
     GetSettings()
@@ -98,7 +118,7 @@ class SettingsDataAccess
 
     UpdateSettings(settings)
     {
-        localStorage.setItem("WRP", JSON.stringify(settings));
+        localStorage.setItem(this.storageKey, JSON.stringify(settings));
     }
 }
 

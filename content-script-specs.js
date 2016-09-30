@@ -77,7 +77,7 @@ describe("When applying user settings, ", function(){
 
 describe("When displaying user settings,", function(){
 
-    it("clicking on the browser icon will open the interface", function(){
+    it("clicking on the browser icon will open the interface", function(){        
         // arrange            
         let plugin = new SettingsService(new SettingsDataAccess());
 
@@ -85,7 +85,7 @@ describe("When displaying user settings,", function(){
         plugin.DisplaySettings();
 
         // assert        
-        let userInterface = document.getElementById(plugin.pluginID);
+        let userInterface = document.getElementById(plugin.pluginKey);
 
         if (userInterface)
         {
@@ -105,9 +105,9 @@ describe("When displaying user settings,", function(){
         // act
         plugin.DisplaySettings();
         plugin.DisplaySettings(); 
-        
+
         // assert        
-        let userInterface = document.getElementById(plugin.pluginID);
+        let userInterface = document.getElementById(plugin.pluginKey);
         if (userInterface)
         {
             expect(userInterface.style.visibility).toEqual("hidden");
@@ -136,7 +136,7 @@ describe("Developer documentation for the settings data access class", function(
     it("user settings will be retrieved from local storage", function(){
         // arrange
         let expectedSettings = { "this word" : "that word" };
-        localStorage.setItem("WRP", JSON.stringify(expectedSettings));
+        localStorage.setItem(sut.storageKey, JSON.stringify(expectedSettings));
         // act 
         let actualSettings = sut.GetSettings();
         // assert
@@ -145,7 +145,7 @@ describe("Developer documentation for the settings data access class", function(
 
     it("default settings will be returned if user settings are empty", function(){
         // arrange
-        localStorage.setItem("WRP", '');
+        localStorage.setItem(sut.storageKey, '');
         // act 
         let result = sut.GetSettings();
         // assert
@@ -154,7 +154,7 @@ describe("Developer documentation for the settings data access class", function(
 
     it("default settings will be returned if user settings are null", function(){
         // arrange
-        localStorage.setItem("WRP", null);
+        localStorage.setItem(sut.storageKey, null);
         // act 
         let result = sut.GetSettings();
         // assert
@@ -163,7 +163,7 @@ describe("Developer documentation for the settings data access class", function(
 
     it("default settings will be returned if user settings are invalid json", function(){
         // arrange
-        localStorage.setItem("WRP", '{');
+        localStorage.setItem(sut.storageKey, '{');
         // act 
         let result = sut.GetSettings();
         // assert
@@ -172,7 +172,7 @@ describe("Developer documentation for the settings data access class", function(
 
     it("default settings will be returned if user settings not a JSON object", function(){
         // arrange
-        localStorage.setItem("WRP", 9);
+        localStorage.setItem(sut.storageKey, 9);
         // act 
         let result = sut.GetSettings();
         // assert
