@@ -77,9 +77,47 @@ describe("When applying user settings, ", function(){
 
 describe("When displaying user settings,", function(){
 
-    it("clicking on the browser icon will open the interface");
+    it("clicking on the browser icon will open the interface", function(){
+        // arrange            
+        let plugin = new SettingsService(new SettingsDataAccess());
 
-    it("clicking on the browser icon again will close the interface");    
+        // act
+        plugin.DisplaySettings();
+
+        // assert        
+        let userInterface = document.getElementById(plugin.pluginID);
+
+        if (userInterface)
+        {
+            expect(userInterface.style.visibility).toEqual("");
+            userInterface.remove();
+        }
+        else
+        {
+            fail("user interface does not exist"); 
+        }  
+    }); 
+
+    it("clicking on the browser icon again will hide the interface", function(){
+        // arrange            
+        let plugin = new SettingsService(new SettingsDataAccess());
+
+        // act
+        plugin.DisplaySettings();
+        plugin.DisplaySettings(); 
+        
+        // assert        
+        let userInterface = document.getElementById(plugin.pluginID);
+        if (userInterface)
+        {
+            expect(userInterface.style.visibility).toEqual("hidden");
+            userInterface.remove();
+        }
+        else
+        {
+            fail("user interface does not exist"); 
+        }       
+    });    
 
     it("clicking on a user setting will populate the settings form");
 
