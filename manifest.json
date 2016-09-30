@@ -1,0 +1,34 @@
+{
+    "manifest_version": 2,
+    "name": "To Be Determined",
+    "description": "To Be Determined",
+    "version": "1.0",
+    "browser_action": {
+        "default_icon": "icon-small.png",
+        "default_title": "To Be Determined"
+    },
+    "background": {
+        "scripts": [
+            "background.js"
+        ]
+    },
+    "content_scripts": [
+        {
+            "matches": [
+                "http://*/*",
+                "https://*/*"
+            ],
+            "js": [
+                "content-script.js"
+            ]
+        }
+    ],
+    "web_accessible_resources": [
+        "icon-large.png"
+    ],
+    "permissions": [
+        "tabs",
+        "http://*/*",
+        "https://*/*"
+    ]
+}
