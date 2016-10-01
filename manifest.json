@@ -25,7 +25,7 @@
         }
     ],
     "web_accessible_resources": [
-        "/icon-large.png"
+        "icon-large.png"
     ],
     "permissions": [
         "tabs",

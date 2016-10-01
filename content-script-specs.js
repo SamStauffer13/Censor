@@ -1,13 +1,13 @@
 // todo, use package.json to pull in jasmine instead of c/p'd files - reason is, we'll be pulling in babel and web pack via this method anyways, no reason to be inconsistent
 
-describe("When applying user settings, ", function(){
+describe("When applying user settings, ", function () {
 
-    it("the plugin will replace any word on a web page with a word defined in its settings", function(){
+    it("the plugin will replace any word on a web page with a word defined in its settings", function () {
 
         // arrange
-        let word = 'fire ants'; 
+        let word = 'fire ants';
         let definition = 'spicy boys'; // support the cause: https://goo.gl/6Rl20I
-        
+
         let div = document.createElement("div");
         let span = document.createElement("span");
 
@@ -16,9 +16,9 @@ describe("When applying user settings, ", function(){
         div.appendChild(span);
         document.body.appendChild(div);
 
-        let fakeDataAccess = new SettingsDataAccess();            
-        fakeDataAccess.GetSettings = () => { return { [word] : definition }; }
-        
+        let fakeDataAccess = new SettingsDataAccess();
+        fakeDataAccess.GetSettings = () => { return { [word]: definition }; }
+
         // act
         let plugin = new SettingsService(fakeDataAccess);
 
@@ -28,41 +28,41 @@ describe("When applying user settings, ", function(){
         div.remove();
     });
 
-    it("the plugin will automatically replace words added after page load", function(done){
+    it("the plugin will automatically replace words added after page load", function (done) {
 
         // uses a mutation observer https://goo.gl/iBc25q
 
         // arrange (copied from above)
-        let word = 'fire ants'; 
+        let word = 'fire ants';
         let definition = 'spicy boys';
 
         let div = document.createElement("div");
-        let span = document.createElement("span");            
+        let span = document.createElement("span");
 
         div.appendChild(span);
         document.body.appendChild(div);
 
-        let fakeDataAccess = new SettingsDataAccess();            
-        fakeDataAccess.GetSettings = () => { return { [word] : definition }; }
-        
+        let fakeDataAccess = new SettingsDataAccess();
+        fakeDataAccess.GetSettings = () => { return { [word]: definition }; }
+
         // act
         let plugin = new SettingsService(fakeDataAccess);
 
         // BOOM the dom was changed AFTER the plugin ran...
-        span.innerHTML = `bla bla bla ${word} bla bla bla`;                       
-                    
+        span.innerHTML = `bla bla bla ${word} bla bla bla`;
+
         // async assert
-        setTimeout(function(){
+        setTimeout(function () {
 
             expect(span.innerHTML).toEqual(`bla bla bla ${definition} bla bla bla`);
 
             done();
-                            
+
             div.remove();
 
-            }, 100);
+        }, 100);
 
-            expect(true).toEqual(true);                                         
+        expect(true).toEqual(true);
     });
 
     it("the plugin will ignore capitolization and plurlization");
@@ -71,14 +71,14 @@ describe("When applying user settings, ", function(){
 
     it("the plugin will ignored english determiners like The and A");
 
-    it("the plugin will recursively utilize keywords to modify a page's contents", function(){
+    it("the plugin will recursively utilize keywords to modify a page's contents", function () {
         pending(); // take the first word and the content after it, if the content after it contains the second word, replace the whole string...
     });
 });
 
-describe("When displaying user settings,", function(){
+describe("When displaying user settings,", function () {
 
-    it("clicking on the browser icon will open the interface", function(){        
+    it("clicking on the browser icon will open the interface", function () {
         // arrange            
         let plugin = new SettingsService(new SettingsDataAccess());
 
@@ -88,35 +88,31 @@ describe("When displaying user settings,", function(){
         // assert        
         let userInterface = document.getElementById(plugin.pluginKey);
 
-        if (userInterface)
-        {
+        if (userInterface) {
             expect(userInterface.style.visibility).toEqual("");
             userInterface.remove();
         }
-        else
-        {
-            fail("user interface does not exist"); 
+        else {
+            fail("user interface does not exist");
         }
-    }); 
+    });
 
-    it("clicking on the browser icon again will hide the interface", function(){
+    it("clicking on the browser icon again will hide the interface", function () {
         // arrange            
         let plugin = new SettingsService(new SettingsDataAccess());
 
         // act
         plugin.DisplaySettings();
-        plugin.DisplaySettings(); 
+        plugin.DisplaySettings();
 
         // assert        
         let userInterface = document.getElementById(plugin.pluginKey);
-        if (userInterface)
-        {
+        if (userInterface) {
             expect(userInterface.style.visibility).toEqual("hidden");
             userInterface.remove();
         }
-        else
-        {
-            fail("user interface does not exist"); 
+        else {
+            fail("user interface does not exist");
         }
     });
 
@@ -125,58 +121,68 @@ describe("When displaying user settings,", function(){
     it("interface should give adequate props to Marat for supplying the attack helicopter icon");
 });
 
-describe("When saving user settings,", function(){
+describe("When saving user settings,", function () {
 
 });
 
-describe("Developer documentation for the settings data access class", function(){
+describe("Developer documentation for the settings data access class", function () {
 
     let sut;
     beforeEach(() => { sut = new SettingsDataAccess(); });
 
-    it("user settings will be retrieved from local storage", function(){
+    it("user settings will be retrieved from local storage", function () {
         // arrange
-        let expectedSettings = { "this word" : "that word" };
+        let expectedSettings = { "this word": "that word" };
         localStorage.setItem(sut.storageKey, JSON.stringify(expectedSettings));
         // act 
         let actualSettings = sut.GetSettings();
         // assert
-        expect(actualSettings).toEqual(expectedSettings); 
+        expect(actualSettings).toEqual(expectedSettings);
     });
 
-    it("default settings will be returned if user settings are empty", function(){
+    it("user notes will be retrieved from local storage", function () {
+        // arrange
+        let expectedNotes = "my spirit animal comes in a pretzel bun";
+        localStorage.setItem(sut.notesKey, expectedNotes);
+        // act 
+        let actualNotes = sut.GetNotes();
+        // assert
+        expect(actualNotes).toEqual(expectedNotes);
+    });
+
+    it("default settings will be returned if user settings are empty", function () {
         // arrange
         localStorage.setItem(sut.storageKey, '');
         // act 
         let result = sut.GetSettings();
         // assert
-        expect(result).toEqual(sut.defaultSettings); 
+        expect(result).toEqual(sut.defaultSettings);
     });
 
-    it("default settings will be returned if user settings are null", function(){
+    it("default settings will be returned if user settings are null", function () {
         // arrange
         localStorage.setItem(sut.storageKey, null);
         // act 
         let result = sut.GetSettings();
         // assert
-        expect(result).toEqual(sut.defaultSettings); 
+        expect(result).toEqual(sut.defaultSettings);
     });
 
-    it("default settings will be returned if user settings are invalid json", function(){
+    it("default settings will be returned if user settings are invalid json", function () {
         // arrange
         localStorage.setItem(sut.storageKey, '{');
         // act 
         let result = sut.GetSettings();
         // assert
-        expect(result).toEqual(sut.defaultSettings); 
+        expect(result).toEqual(sut.defaultSettings);
     });
 
-    it("default settings will be returned if user settings not a JSON object", function(){
+    it("default settings will be returned if user settings not a JSON object", function () {
         // arrange
         localStorage.setItem(sut.storageKey, 9);
         // act 
         let result = sut.GetSettings();
         // assert
-        expect(result).toEqual(sut.defaultSettings); 
-    });        
+        expect(result).toEqual(sut.defaultSettings);
+    });
 });
