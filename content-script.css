@@ -1,0 +1,69 @@
+@font-face {
+    font-family: summit;
+    src: url('chrome-extension://__MSG_@@extension_id__/SummitLight-Display.ttf');
+    src: url(SummitLight-Display.ttf);
+}
+
+.plugin-popup{
+    opacity:0.8;
+    background-color: dimgrey;
+    position:fixed;
+    width:100%;
+    height:100%;
+    top:0px;
+    left:0px;
+    z-index:1000;
+    text-align: center;
+    vertical-align: middle;
+    font-weight:bold;
+    font-size:50px;
+    font-family: summit;  
+    color: white;  
+}
+
+.plugin-text-box-left{
+    text-align: right;
+    outline: none;
+    border: 0px none;
+    background: transparent;
+    font: inherit;
+    font-size:30px;         
+    color: black;       
+}
+
+.plugin-text-box-right{
+    text-align: left;
+    outline: none;
+    border: 0px none;
+    background: transparent;
+    font: inherit;
+    font-size:30px;         
+    color: black;       
+}
+
+.plugin-text-area{
+    display:block;
+    height: 50%;
+    width:100%;
+    outline: none;
+    border: 0px none;
+    background: transparent;
+    font: inherit;
+    font-size:30px;         
+    color: black;  
+}
+
+.plugin-save-button{
+     margin-top: 100px;
+     background:none!important;
+     border:none; 
+     padding:0!important;
+     font: inherit;    
+     color: inherit;
+     cursor: pointer;
+     font-size: 100px;     
+}
+
+.plugin-save-button:hover{        
+     color: black;     
+}

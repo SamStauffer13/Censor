@@ -71,6 +71,8 @@ describe("When applying user settings, ", function () {
 
     it("the plugin will ignored english determiners like The and A");
 
+    it("the plugin will not replace words on the user interface");
+
     it("the plugin will recursively utilize keywords to modify a page's contents", function () {
         pending(); // take the first word and the content after it, if the content after it contains the second word, replace the whole string...
     });
@@ -86,7 +88,7 @@ describe("When displaying user settings,", function () {
         plugin.DisplaySettings();
 
         // assert        
-        let userInterface = document.getElementById(plugin.pluginKey);
+        let userInterface = document.getElementById(plugin.cssElements.popup);
 
         if (userInterface) {
             expect(userInterface.style.visibility).toEqual("");
@@ -106,7 +108,7 @@ describe("When displaying user settings,", function () {
         plugin.DisplaySettings();
 
         // assert        
-        let userInterface = document.getElementById(plugin.pluginKey);
+        let userInterface = document.getElementById(plugin.cssElements.popup);
         if (userInterface) {
             expect(userInterface.style.visibility).toEqual("hidden");
             userInterface.remove();

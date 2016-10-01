@@ -21,11 +21,15 @@
             "js": [
                 "content-script.js",
                 "content-script-init.js"
+            ],
+            "css": [
+                "content-script.css"
             ]
         }
     ],
     "web_accessible_resources": [
-        "icon-large.png"
+        "icon-large.png",
+        "SummitLight-Display.ttf"
     ],
     "permissions": [
         "tabs",

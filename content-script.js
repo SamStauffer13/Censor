@@ -7,9 +7,16 @@ class SettingsService {
 
         this.db = SettingsDataAccess;
         this.timesInvoked = 1;
-        this.pluginKey = "2646C6BD6CCCCF9947F69EF256CA8";
-        this.saveButtonKey = "8F2C924C61BA96CBAB68E3CB2DA44";
-        this.marKey = "A3EC18473FC9AD6A41BA384C61C77";
+
+        this.cssElements =
+            {
+                popup: "plugin-popup",
+                spans: "plugin-spans",
+                textBoxLeft: "plugin-text-box-left",
+                textBoxRight: "plugin-text-box-right",
+                saveButton: "plugin-save-button",                
+                textArea: "plugin-text-area"
+            }
 
         this.ApplySettings();
 
@@ -35,46 +42,17 @@ class SettingsService {
 
     DisplaySettings() {
 
-        let popup = document.getElementById(this.pluginKey);
+        // this.observer.disconnect();
+
+        let popup = document.getElementById(this.cssElements.popup);
 
         if (popup) return popup.style.visibility = popup.style.visibility ? "" : "hidden"; // show / hide
-
-        // todo: inject a stylesheet
-        let styles =
-            {
-                popup: // todo: import custom font
-                `opacity:0.8;
-            background-color: dimgrey;
-            position:fixed;
-            width:100%;
-            height:100%;
-            top:0px;
-            left:0px;
-            z-index:1000;
-            text-align: center;
-            vertical-align: middle;
-            font-weight:bold;
-            font-size:50px;  
-            color: white;  `,
-                marquee:
-                `display:block;`,
-                span: ``, // todo: marquee tags are no longer supported, use css to move content accross the page
-                saveButton:
-                `margin-top: 100px;
-            background:none!important;
-            border:none; 
-            padding:0!important;
-            font: inherit;    
-            color: inherit;
-            cursor: pointer;
-            font-size: 100px;`
-            }
 
         let settingsFromDb = this.db.GetSettings(), spans = "";
 
         Object.keys(settingsFromDb).forEach(word => {
 
-            spans += `<span class="${styles.span}"> ${word} is a ${settingsFromDb[word]} and </span>`;
+            spans += `<span class="${this.cssElements.spans}"> ${word} is ${settingsFromDb[word]} and </span>`;
 
         });
 
@@ -82,31 +60,33 @@ class SettingsService {
 
         popup.innerHTML =
 
-            `<div id=${this.pluginKey} style="${styles.popup}">
+            `<div id=${this.cssElements.popup} class="${this.cssElements.popup}">
 
-            <marquee id=${this.marKey} style="${styles.marquee}"> ${spans} </marquee>
+            <marquee class=""> ${spans} </marquee>
 
-            <span> 
+            <span class=""> 
 
-                <input type="text" value="Life"/> is <input type="text" value="A Dream"/>
+                <input class="${this.cssElements.textBoxLeft}" type="text" onfocus="this.value = '' " onkeypress="this.style.width = ((this.value.length + 1)" value="Life"/> 
+                is
+                <input class="${this.cssElements.textBoxRight}" type="text" onfocus="this.value = ''; " onkeypress="this.style.width = ((this.value.length + 1)" value="A Dream"/>
 
             </span>
 
-            ${ chrome.extension ? `<img src=${chrome.extension.getURL("icon-large.png")}/>` : ``}
+            <img class="" src="${ chrome.extension ? chrome.extension.getURL("icon-large.png") : "icon-large.png" }"/>
 
-            <button id=${this.saveButtonKey} style="${styles.saveButton}"> Stay Strange... </button>
+            <button id=${this.cssElements.saveButton} class="${this.cssElements.saveButton}"> Stay Strange, </button>
 
-            <textarea> ${this.db.GetNotes()} </textarea>
+            <textarea class="${this.cssElements.textArea}"> ${this.db.GetNotes()} </textarea>
 
          </div>`;
 
         document.body.appendChild(popup);
 
-        document.getElementById(this.saveButtonKey).addEventListener("click", () => { this.SaveSettings(); });
+        document.getElementById(this.cssElements.saveButton).addEventListener("click", () => { this.SaveSettings(); });
     }
 
     SaveSettings() {
-        let popup = document.getElementById(this.pluginKey);
+        let popup = document.getElementById(this.cssElements.popup);
         return popup.style.visibility = "hidden"; // hide
     }
 }
