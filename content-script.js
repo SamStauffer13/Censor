@@ -42,7 +42,7 @@ class SettingsService {
         // todo: inject a stylesheet
         let styles =
             {
-                popup:
+                popup: // todo: import custom font
                 `opacity:0.8;
             background-color: dimgrey;
             position:fixed;
@@ -88,7 +88,7 @@ class SettingsService {
 
             <span> 
 
-                <input type="text" value="Life"/> is a <input type="text" value="Dream"/>
+                <input type="text" value="Life"/> is <input type="text" value="A Dream"/>
 
             </span>
 
@@ -116,7 +116,6 @@ class SettingsDataAccess {
     constructor() {
         this.storageKey = "7DCF8FAAC5ECB6FF17DF5487735A7";
         this.notesKey = "8B7C91137E2AFE924FBFBB3E6FE71";
-
         this.defaultSettings = { "Donald Trump": "A Mad Scientist", "Hillary Clinton": "A Six Foot Tall Giant Robot" }; // todo refactor this to use a map instead of key value object
         // this.defaultSettings = new Map().set("Donald Trump", "A Mad Scientist").set("Hillary Clinton", "A Six Foot Tall Giant Robot");
     }
