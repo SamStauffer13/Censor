@@ -5,6 +5,7 @@
 }
 
 .plugin-popup{
+    padding: .25em 0;
     opacity:0.8;
     background-color: dimgrey;
     position:fixed;
@@ -41,10 +42,31 @@
     color: black;       
 }
 
+.plugin-text-box-right:hover, .plugin-text-box-left:hover{
+         color: white;
+}
+
 .plugin-image-large{
     max-width: 30%;
     height: auto;
-    display: inline;
+    float: left;
+}
+
+.plugin-save-button{
+     margin-top: 100px;
+     background:none!important;
+     border:none; 
+     padding:0!important;
+     font: inherit;    
+     color: inherit;
+     cursor: pointer;
+     font-size: 70px;
+     width: 60%;
+     float: right;     
+}
+
+.plugin-save-button:hover{        
+     color: black;     
 }
 
 .plugin-text-area{
@@ -57,19 +79,4 @@
     font: inherit;
     font-size:30px;         
     color: black;  
-}
-
-.plugin-save-button{
-     margin-top: 100px;
-     background:none!important;
-     border:none; 
-     padding:0!important;
-     font: inherit;    
-     color: inherit;
-     cursor: pointer;
-     font-size: 100px;     
-}
-
-.plugin-save-button:hover{        
-     color: black;     
 }

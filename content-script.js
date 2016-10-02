@@ -65,7 +65,6 @@ class SettingsService {
 
             <span class=""> 
 
-                <input class="${this.cssElements.textBoxLeft}" type="text" onfocus="this.value = '' " onkeypress="this.style.width = ((this.value.length + 1)" value="Life"/> 
                 is
                 <input class="${this.cssElements.textBoxRight}" type="text" onfocus="this.value = ''; " onkeypress="this.style.width = ((this.value.length + 1)" value="A Dream"/>
 
