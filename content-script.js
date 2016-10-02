@@ -24,6 +24,8 @@ class SettingsService {
         // todo: pass in chrome API as dependency and fake it in the unit tests 
         if (chrome.runtime.onMessage) chrome.runtime.onMessage.addListener((request, sender, sendResponse) => { if (request.displaySettings) plugin.DisplaySettings(); });
 
+        // https://developer.mozilla.org/en-US/docs/Web/API/NodeList - loop over addedNodes, use object keys, pass in node to apply method...
+        
         // todo: pass in relevant mutant nodes ( exluding our UI nodes ) instead of entire document body 
         new MutationObserver(mutations => { this.ApplySettings(); }).observe(document.body, { subtree: true, childList: true });
     }
@@ -35,7 +37,9 @@ class SettingsService {
         let settings = this.db.GetSettings(), ent = document.createTreeWalker(domToParse, NodeFilter.SHOW_TEXT);
 
         while (ent.nextNode()) {
+
             Object.keys(settings).forEach(word => { ent.currentNode.nodeValue = ent.currentNode.nodeValue.replace(word, settings[word]); });
+
         }
 
         console.info(`plugin took ${performance.now() - start} ms on execution #${this.timesInvoked++}`);
@@ -63,16 +67,21 @@ class SettingsService {
 
             <marquee class=""> ${spans} </marquee>
 
-            <span class=""> 
+            <div class=""> 
+
+                <input class="${this.cssElements.textBoxLeft}" type="text" onfocus="this.value = '' " onkeypress="this.style.width = ((this.value.length + 1)" value="Life"/>
 
                 is
+
                 <input class="${this.cssElements.textBoxRight}" type="text" onfocus="this.value = ''; " onkeypress="this.style.width = ((this.value.length + 1)" value="A Dream"/>
 
-            </span>
+            </div>
 
-            <img class="${this.cssElements.imageLarge}" src="${ chrome.extension ? chrome.extension.getURL("icon-large.png") : "icon-large.png" }"/>
+            <div>
+                <img class="${this.cssElements.imageLarge}" src="${ chrome.extension ? chrome.extension.getURL("icon-large.png") : "icon-large.png" }"/>
 
-            <button id=${this.cssElements.saveButton} class="${this.cssElements.saveButton}"> Stay Strange, </button>
+                <button id=${this.cssElements.saveButton} class="${this.cssElements.saveButton}"> Stay Strange, </button>
+            </div>
 
             <textarea class="${this.cssElements.textArea}"> ${this.db.GetNotes()} </textarea>
 
