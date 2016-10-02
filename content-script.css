@@ -41,6 +41,12 @@
     color: black;       
 }
 
+.plugin-image-large{
+    max-width: 30%;
+    height: auto;
+    display: inline;
+}
+
 .plugin-text-area{
     display:block;
     height: 50%;

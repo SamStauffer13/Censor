@@ -14,6 +14,7 @@ class SettingsService {
                 spans: "plugin-spans",
                 textBoxLeft: "plugin-text-box-left",
                 textBoxRight: "plugin-text-box-right",
+                imageLarge: "plugin-image-large",
                 saveButton: "plugin-save-button",                
                 textArea: "plugin-text-area"
             }
@@ -41,8 +42,6 @@ class SettingsService {
     }
 
     DisplaySettings() {
-
-        // this.observer.disconnect();
 
         let popup = document.getElementById(this.cssElements.popup);
 
@@ -72,7 +71,7 @@ class SettingsService {
 
             </span>
 
-            <img class="" src="${ chrome.extension ? chrome.extension.getURL("icon-large.png") : "icon-large.png" }"/>
+            <img class="${this.cssElements.imageLarge}" src="${ chrome.extension ? chrome.extension.getURL("icon-large.png") : "icon-large.png" }"/>
 
             <button id=${this.cssElements.saveButton} class="${this.cssElements.saveButton}"> Stay Strange, </button>
 
