@@ -2,6 +2,8 @@
 
 'use strict';
 
+// two things: h3's styled differently + on hover / on focus events tied to the textboxes...
+
 class SettingsService {
     constructor(SettingsDataAccess) {
 
@@ -15,19 +17,17 @@ class SettingsService {
                 textBoxLeft: "plugin-text-box-left",
                 textBoxRight: "plugin-text-box-right",
                 imageLarge: "plugin-image-large",
-                saveButton: "plugin-save-button",                
+                saveButton: "plugin-save-button",
                 textArea: "plugin-text-area"
             }
 
         this.ApplySettings();
 
-        // todo: pass in chrome API as dependency and fake it in the unit tests 
+        // todo: pass in chrome API as dependency and mock it in the unit tests 
         if (chrome.runtime.onMessage) chrome.runtime.onMessage.addListener((request, sender, sendResponse) => { if (request.displaySettings) plugin.DisplaySettings(); });
 
-        // https://developer.mozilla.org/en-US/docs/Web/API/NodeList - loop over addedNodes, use object keys, pass in node to apply method...
-        
-        // todo: pass in relevant mutant nodes ( exluding our UI nodes ) instead of entire document body 
-        new MutationObserver(mutations => { this.ApplySettings(); }).observe(document.body, { subtree: true, childList: true });
+        // todo: research way to optimize this without N+1 looping + limit to run only once a second
+        new MutationObserver(mutations => { this.ApplySettings(); }).observe(document.body, { childList: true });
     }
 
     ApplySettings(domToParse = document.body) {
@@ -38,11 +38,12 @@ class SettingsService {
 
         while (ent.nextNode()) {
 
+            // this.db.GetSettings().forEach((word, definition) => ent.currentNode.nodeValue = ent.currentNode.nodeValue.replace(word, definition); );
             Object.keys(settings).forEach(word => { ent.currentNode.nodeValue = ent.currentNode.nodeValue.replace(word, settings[word]); });
 
         }
 
-        console.info(`plugin took ${performance.now() - start} ms on execution #${this.timesInvoked++}`);
+        // console.info(`plugin took ${performance.now() - start} ms on execution #${this.timesInvoked++}`);
     }
 
     DisplaySettings() {
@@ -68,17 +69,17 @@ class SettingsService {
             <marquee class=""> ${spans} </marquee>
 
             <div class=""> 
-
-                <input class="${this.cssElements.textBoxLeft}" type="text" onfocus="this.value = '' " onkeypress="this.style.width = ((this.value.length + 1)" value="Life"/>
+            
+                <input class="${this.cssElements.textBoxLeft}" type="text" value="Life"/>
 
                 is
 
-                <input class="${this.cssElements.textBoxRight}" type="text" onfocus="this.value = ''; " onkeypress="this.style.width = ((this.value.length + 1)" value="A Dream"/>
+                <input class="${this.cssElements.textBoxRight}" type="text" value="A Dream"/>
 
             </div>
 
             <div>
-                <img class="${this.cssElements.imageLarge}" src="${ chrome.extension ? chrome.extension.getURL("icon-large.png") : "icon-large.png" }"/>
+                <img class="${this.cssElements.imageLarge}" src="${chrome.extension ? chrome.extension.getURL("icon-large.png") : "icon-large.png"}"/>
 
                 <button id=${this.cssElements.saveButton} class="${this.cssElements.saveButton}"> Stay Strange, </button>
             </div>
@@ -101,16 +102,20 @@ class SettingsService {
 // todo: have this callout to an API so data can persist accross clients
 class SettingsDataAccess {
     constructor() {
+
         this.storageKey = "7DCF8FAAC5ECB6FF17DF5487735A7";
         this.notesKey = "8B7C91137E2AFE924FBFBB3E6FE71";
+
         this.defaultSettings = { "Donald Trump": "A Mad Scientist", "Hillary Clinton": "A Six Foot Tall Giant Robot" }; // todo refactor this to use a map instead of key value object
         // this.defaultSettings = new Map().set("Donald Trump", "A Mad Scientist").set("Hillary Clinton", "A Six Foot Tall Giant Robot");
     }
 
     GetSettings() {
+
         let settings = localStorage.getItem(this.storageKey);
 
         try {
+            // return new Map(JSON.parse(settings));
             let parsed = JSON.parse(settings);
             if (parsed && typeof parsed === 'object') return parsed;
         }
@@ -122,7 +127,10 @@ class SettingsDataAccess {
     }
 
     UpdateSettings(settings) {
+
+        // localStorage.setItem(this.storageKey, JSON.stringify(Array.from(settings.entries()));
         localStorage.setItem(this.storageKey, JSON.stringify(settings));
+
     }
 
     GetNotes() {

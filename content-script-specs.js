@@ -67,7 +67,34 @@ describe("When applying user settings, ", function () {
 
     it("the plugin will ignore capitolization and plurlization");
 
-    it("the plugin will ignore prefixs like Mr. and Mrs.");
+    it("the plugin will ignore prefixs like Mr. and Mrs.", function(){
+
+        pending();
+
+        // arrange
+        let word = 'fire ants';
+        let definition = 'spicy boys'; // support the cause: https://goo.gl/6Rl20I
+
+        let div = document.createElement("div");
+        let span = document.createElement("span");
+
+        span.innerHTML = `bla bla bla ${word} bla bla bla`;
+
+        div.appendChild(span);
+        document.body.appendChild(div);
+
+        let fakeDataAccess = new SettingsDataAccess();
+        fakeDataAccess.GetSettings = () => { return { [word]: definition }; }
+
+        // act
+        let plugin = new SettingsService(fakeDataAccess);
+
+        // assert
+        expect(span.innerHTML).toEqual(`bla bla bla ${definition} bla bla bla`);
+
+        div.remove();
+
+    });
 
     it("the plugin will ignored english determiners like The and A");
 
