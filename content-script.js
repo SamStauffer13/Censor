@@ -101,15 +101,13 @@ class SettingsService {
 
         let textBoxLeft = document.getElementById(this.cssElements.textBoxLeft);
         let textBoxRight = document.getElementById(this.cssElements.textBoxRight);
-
-        // you will have to loop over them...
+        
         let spansLeft = document.getElementsByClassName(this.cssElements.spanLeft);
-        Array.from(spansLeft).forEach( span => { span.addEventListener("click", () => { textBoxLeft.value = span.innerHTML });   });
-        // spanLeft.forEach(span => { console.log("span") });
-        // let spanRight = document.getElementByClassName(this.cssElements.spanRight);
-        // spanLeft.addEventListener("click", () => { textBoxLeft.innerHTML = spanLeft.innerHTML });
-        // spanRight.addEventListener("click", () => { textBoxRight.innerHTML = spanRight.innerHTML });
+        Array.from(spansLeft).forEach( span => { span.addEventListener("click", () => { textBoxLeft.value = span.innerHTML }); });
 
+        let spansRight = document.getElementsByClassName(this.cssElements.spansRight);
+        Array.from(spansRight).forEach( span => { span.addEventListener("click", () => { textBoxRight.value = span.innerHTML }); });
+        
         let saveButton = document.getElementById(this.cssElements.saveButton);
         saveButton.addEventListener("click", () => this.SaveSettings());
         saveButton.addEventListener("mouseover", () => saveButton.innerHTML = "Save Changes");
