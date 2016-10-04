@@ -118,11 +118,15 @@ describe("When displaying user settings,", function () {
         let userInterface = document.getElementById(plugin.cssElements.popup);
 
         if (userInterface) {
+
             expect(userInterface.style.visibility).toEqual("");
             userInterface.remove();
+
         }
         else {
+
             fail("user interface does not exist");
+
         }
     });
 
@@ -137,11 +141,15 @@ describe("When displaying user settings,", function () {
         // assert        
         let userInterface = document.getElementById(plugin.cssElements.popup);
         if (userInterface) {
+
             expect(userInterface.style.visibility).toEqual("hidden");
             userInterface.remove();
+
         }
         else {
+
             fail("user interface does not exist");
+            
         }
     });
 

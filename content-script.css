@@ -61,8 +61,8 @@
      font: inherit;    
      color: inherit;
      cursor: pointer;
-     font-size:30px; 
-     display:none;        
+     font-size:30px;
+     visibility: "hidden"; 
 }
 
 .plugin-image-large{

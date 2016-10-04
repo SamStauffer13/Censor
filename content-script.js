@@ -2,7 +2,9 @@
 
 'use strict';
 
-// todo default font to something less ugly + use place holder text on inputs instead of text values.. 
+// todo get font working http://stackoverflow.com/questions/12015074/adding-font-face-stylesheet-rules-to-chrome-extension
+// use IDs instead of classes for better specificity 
+// use place holder text on inputs instead of text values.. 
 // get on clicks of spans to populate boxes
 // get save button hooked up
 // publish app
@@ -16,9 +18,9 @@ class SettingsService {
 
         this.cssElements =
             {
-                popup: "plugin-popup",                
+                popup: "plugin-popup",
                 spanLeft: "plugin-span-left",
-                spanRight: "plugin-span-right", 
+                spanRight: "plugin-span-right",
                 textBoxLeft: "plugin-text-box-left",
                 textBoxRight: "plugin-text-box-right",
                 updateButton: "plugin-update-button",
@@ -57,13 +59,12 @@ class SettingsService {
         let popup = document.getElementById(this.cssElements.popup);
 
         if (popup) return popup.style.visibility = popup.style.visibility ? "" : "hidden"; // show / hide
- 
+
         let settingsFromDb = this.db.GetSettings(), spans = "";
 
         Object.keys(settingsFromDb).forEach(word => {
             // todo: something like definition == settingsFromDb[settingsFromDb.length] ? and : ""
-            spans += `<span class=""> <span class="${this.cssElements.spanLeft}"> ${word} </span> is <span class="${this.cssElements.spanRight}"> ${settingsFromDb[word]} </span> and </span>`;
-
+            spans += `<span class=""> <span id=${this.cssElements.spanLeft} class="${this.cssElements.spanLeft}"> ${word} </span> is <span id=${this.cssElements.spanRight} class="${this.cssElements.spanRight}"> ${settingsFromDb[word]} </span> and </span>`;
         });
 
         popup = document.createElement("div");
@@ -72,17 +73,17 @@ class SettingsService {
 
             `<div id=${this.cssElements.popup} class="${this.cssElements.popup}">
 
-            <marquee class=""> ${spans} </marquee>
+            <marquee class="${this.cssElements.marquee}"> ${spans} </marquee>
 
             <div class=""> 
             
-                <input class="${this.cssElements.textBoxLeft}" type="text" value="Life"/>
+                <input id=${this.cssElements.textBoxLeft} class="${this.cssElements.textBoxLeft}" type="text" value="Life"/>
 
                 is
 
-               <input class="${this.cssElements.textBoxRight}" type="text" value="A Dream"/>
+               <input id=${this.cssElements.textBoxRight} class="${this.cssElements.textBoxRight}" type="text" value="A Dream"/>
 
-               <button class="${this.cssElements.updateButton}"> Save </button>
+               <button id=${this.cssElements.updateButton} class="${this.cssElements.updateButton}"> Update </button>
 
             </div>
 
@@ -98,16 +99,52 @@ class SettingsService {
 
         document.body.appendChild(popup);
 
-        // todo each of these elements should probably be their own object  
+        //todo: use popup instead of searching document
+        let textBoxLeft = document.getElementById(this.cssElements.textBoxLeft);
+        let textBoxRight = document.getElementById(this.cssElements.textBoxRight);
+        let updateButton = document.getElementById(this.cssElements.updateButton);
         let saveButton = document.getElementById(this.cssElements.saveButton);
-        saveButton.addEventListener("click", () =>  this.SaveSettings());        
-        saveButton.addEventListener("mouseover", () =>  saveButton.innerHTML = "Save Changes" );
-        saveButton.addEventListener("mouseout", () => saveButton.innerHTML = "Stay Strange" );
+
+        textBoxLeft.addEventListener("input", () => updateButton.style.visibility = "");
+        textBoxRight.addEventListener("input", () => updateButton.style.visibility = "");
+
+        updateButton.addEventListener("click", () => {
+
+            this.UpdateSettings();
+            updateButton.style.visibility = "hidden";
+
+        });
+
+        Array.from(document.getElementsByClassName(this.cssElements.spanLeft)).forEach(span => {
+            span.addEventListener("click", () => {
+
+                textBoxLeft.value = span.innerHTML;
+                updateButton.style.visibility = ""; // todo: why doesn't input event listener fire?
+
+            });
+        });
+
+        Array.from(document.getElementsByClassName(this.cssElements.spanRight)).forEach(span => {
+            span.addEventListener("click", () => {
+
+                textBoxRight.value = span.innerHTML;
+                updateButton.style.visibility = "";
+                 
+            });
+        });
+
+        saveButton.addEventListener("click", () => this.SaveSettings());
+        saveButton.addEventListener("mouseover", () => saveButton.innerHTML = "Save & Exit");
+        saveButton.addEventListener("mouseout", () => saveButton.innerHTML = "Stay Strange");
+    }
+
+    UpdateSettings() {
+
     }
 
     SaveSettings() {
         let popup = document.getElementById(this.cssElements.popup);
-        return popup.style.visibility = "hidden"; // hide
+        popup.style.visibility = "hidden"; // hide
     }
 }
 
@@ -146,7 +183,7 @@ class SettingsDataAccess {
 
     }
 
-    GetNotes() {         
+    GetNotes() {
         return localStorage.getItem(this.notesKey) || this.defaultNotes;
     }
 
