@@ -2,7 +2,9 @@
 
 'use strict';
 
-// todo default font to something less ugly + use place holder text on inputs instead of text values.. 
+// todo get font working http://stackoverflow.com/questions/12015074/adding-font-face-stylesheet-rules-to-chrome-extension
+// use IDs instead of classes for better specificity 
+// use place holder text on inputs instead of text values.. 
 // get on clicks of spans to populate boxes
 // get save button hooked up
 // publish app
@@ -16,9 +18,9 @@ class SettingsService {
 
         this.cssElements =
             {
-                popup: "plugin-popup",                
+                popup: "plugin-popup",
                 spanLeft: "plugin-span-left",
-                spanRight: "plugin-span-right", 
+                spanRight: "plugin-span-right",
                 textBoxLeft: "plugin-text-box-left",
                 textBoxRight: "plugin-text-box-right",
                 updateButton: "plugin-update-button",
@@ -61,7 +63,7 @@ class SettingsService {
         let settingsFromDb = this.db.GetSettings(), spans = "";
 
         Object.keys(settingsFromDb).forEach(word => {
-            spans += `<span class=""> <span class="${this.cssElements.spanLeft}"> ${word} </span> is <span class="${this.cssElements.spanRight}"> ${settingsFromDb[word]} </span> and </span>`;
+            spans += `<span class=""> <span id=${this.cssElements.spanLeft} class="${this.cssElements.spanLeft}"> ${word} </span> is <span id=${this.cssElements.spanRight} class="${this.cssElements.spanRight}"> ${settingsFromDb[word]} </span> and </span>`;
 
         });
 
@@ -75,11 +77,11 @@ class SettingsService {
 
             <div class=""> 
             
-                <input class="${this.cssElements.textBoxLeft}" type="text" value="Life"/>
+                <input id=${this.cssElements.textBoxLeft} class="${this.cssElements.textBoxLeft}" type="text" value="Life"/>
 
                 is
 
-               <input class="${this.cssElements.textBoxRight}" type="text" value="A Dream"/>
+               <input id=${this.cssElements.textBoxRight} class="${this.cssElements.textBoxRight}" type="text" value="A Dream"/>
 
                <button class="${this.cssElements.updateButton}"> Save </button>
 
@@ -97,11 +99,19 @@ class SettingsService {
 
         document.body.appendChild(popup);
 
-        // todo each of these elements should probably be their own object  
+        let textBoxLeft = document.getElementById(this.cssElements.textBoxLeft);
+        let textBoxRight = document.getElementById(this.cssElements.textBoxRight);
+
+        // you will have to loop over them...
+        let spanLeft = document.getElementById(this.cssElements.spanLeft);
+        let spanRight = document.getElementById(this.cssElements.spanRight);
+        spanLeft.addEventListener("click", () => { textBoxLeft.innerHTML = spanLeft.innerHTML });
+        spanRight.addEventListener("click", () => { textBoxRight.innerHTML = spanRight.innerHTML });
+
         let saveButton = document.getElementById(this.cssElements.saveButton);
-        saveButton.addEventListener("click", () =>  this.SaveSettings());        
-        saveButton.addEventListener("mouseover", () =>  saveButton.innerHTML = "Save Changes" );
-        saveButton.addEventListener("mouseout", () => saveButton.innerHTML = "Stay Strange" );
+        saveButton.addEventListener("click", () => this.SaveSettings());
+        saveButton.addEventListener("mouseover", () => saveButton.innerHTML = "Save Changes");
+        saveButton.addEventListener("mouseout", () => saveButton.innerHTML = "Stay Strange");
     }
 
     SaveSettings() {
@@ -144,7 +154,7 @@ class SettingsDataAccess {
 
     }
 
-    GetNotes() {         
+    GetNotes() {
         return localStorage.getItem(this.notesKey) || this.defaultNotes;
     }
 
