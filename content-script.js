@@ -57,10 +57,11 @@ class SettingsService {
         let popup = document.getElementById(this.cssElements.popup);
 
         if (popup) return popup.style.visibility = popup.style.visibility ? "" : "hidden"; // show / hide
-
+ 
         let settingsFromDb = this.db.GetSettings(), spans = "";
 
         Object.keys(settingsFromDb).forEach(word => {
+            // todo: something like definition == settingsFromDb[settingsFromDb.length] ? and : ""
             spans += `<span class=""> <span class="${this.cssElements.spanLeft}"> ${word} </span> is <span class="${this.cssElements.spanRight}"> ${settingsFromDb[word]} </span> and </span>`;
 
         });
@@ -119,6 +120,7 @@ class SettingsDataAccess {
 
         this.defaultSettings = { "Donald Trump": "A Mad Scientist", "Hillary Clinton": "A Six Foot Tall Giant Robot" }; // todo refactor this to use a map instead of key value object
         // this.defaultSettings = new Map().set("Donald Trump", "A Mad Scientist").set("Hillary Clinton", "A Six Foot Tall Giant Robot");
+        this.defaultNotes = "My spirit animal comes in a pretzel bun";
     }
 
     GetSettings() {
