@@ -103,10 +103,12 @@ class SettingsService {
         let textBoxRight = document.getElementById(this.cssElements.textBoxRight);
 
         // you will have to loop over them...
-        let spanLeft = document.getElementById(this.cssElements.spanLeft);
-        let spanRight = document.getElementById(this.cssElements.spanRight);
-        spanLeft.addEventListener("click", () => { textBoxLeft.innerHTML = spanLeft.innerHTML });
-        spanRight.addEventListener("click", () => { textBoxRight.innerHTML = spanRight.innerHTML });
+        let spansLeft = document.getElementsByClassName(this.cssElements.spanLeft);
+        Array.from(spansLeft).forEach( span => { span.addEventListener("click", () => { textBoxLeft.value = span.innerHTML });   });
+        // spanLeft.forEach(span => { console.log("span") });
+        // let spanRight = document.getElementByClassName(this.cssElements.spanRight);
+        // spanLeft.addEventListener("click", () => { textBoxLeft.innerHTML = spanLeft.innerHTML });
+        // spanRight.addEventListener("click", () => { textBoxRight.innerHTML = spanRight.innerHTML });
 
         let saveButton = document.getElementById(this.cssElements.saveButton);
         saveButton.addEventListener("click", () => this.SaveSettings());
