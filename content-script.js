@@ -2,7 +2,11 @@
 
 'use strict';
 
-// two things: h3's styled differently + on hover / on focus events tied to the textboxes...
+// todo default font to something less ugly + use place holder text on inputs instead of text values.. 
+// get on clicks of spans to populate boxes
+// get save button hooked up
+// publish app
+// polish styles
 
 class SettingsService {
     constructor(SettingsDataAccess) {
@@ -12,10 +16,12 @@ class SettingsService {
 
         this.cssElements =
             {
-                popup: "plugin-popup",
-                spans: "plugin-spans",
+                popup: "plugin-popup",                
+                spanLeft: "plugin-span-left",
+                spanRight: "plugin-span-right", 
                 textBoxLeft: "plugin-text-box-left",
                 textBoxRight: "plugin-text-box-right",
+                updateButton: "plugin-update-button",
                 imageLarge: "plugin-image-large",
                 saveButton: "plugin-save-button",
                 textArea: "plugin-text-area"
@@ -55,8 +61,7 @@ class SettingsService {
         let settingsFromDb = this.db.GetSettings(), spans = "";
 
         Object.keys(settingsFromDb).forEach(word => {
-
-            spans += `<span class="${this.cssElements.spans}"> ${word} is ${settingsFromDb[word]} and </span>`;
+            spans += `<span class=""> <span class="${this.cssElements.spanLeft}"> ${word} </span> is <span class="${this.cssElements.spanRight}"> ${settingsFromDb[word]} </span> and </span>`;
 
         });
 
@@ -74,7 +79,9 @@ class SettingsService {
 
                 is
 
-                <input class="${this.cssElements.textBoxRight}" type="text" value="A Dream"/>
+               <input class="${this.cssElements.textBoxRight}" type="text" value="A Dream"/>
+
+               <button class="${this.cssElements.updateButton}"> Save </button>
 
             </div>
 
@@ -90,7 +97,11 @@ class SettingsService {
 
         document.body.appendChild(popup);
 
-        document.getElementById(this.cssElements.saveButton).addEventListener("click", () => { this.SaveSettings(); });
+        // todo each of these elements should probably be their own object  
+        let saveButton = document.getElementById(this.cssElements.saveButton);
+        saveButton.addEventListener("click", () =>  this.SaveSettings());        
+        saveButton.addEventListener("mouseover", () =>  saveButton.innerHTML = "Save Changes" );
+        saveButton.addEventListener("mouseout", () => saveButton.innerHTML = "Stay Strange" );
     }
 
     SaveSettings() {
@@ -133,8 +144,8 @@ class SettingsDataAccess {
 
     }
 
-    GetNotes() {
-        return localStorage.getItem(this.notesKey);
+    GetNotes() {         
+        return localStorage.getItem(this.notesKey) || this.defaultNotes;
     }
 
     UpdateNotes(notes) {

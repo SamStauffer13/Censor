@@ -22,6 +22,11 @@
     color: white;  
 }
 
+.plugin-span-left, 
+.plugin-span-right{
+    color:black;
+}
+
 .plugin-text-box-left{
     text-align: right;
     outline: none;
@@ -42,8 +47,22 @@
     color: black;       
 }
 
-.plugin-text-box-right:hover, .plugin-text-box-left:hover{
+.plugin-span-left:hover,
+.plugin-span-right:hover,
+.plugin-text-box-right:hover, 
+.plugin-text-box-left:hover{
          color: white;
+}
+
+.plugin-update-button{
+     background:none!important;
+     border:none; 
+     padding:0!important;
+     font: inherit;    
+     color: inherit;
+     cursor: pointer;
+     font-size:30px; 
+     display:none;        
 }
 
 .plugin-image-large{
@@ -77,7 +96,12 @@
     border: 0px none;
     background: transparent;
     font: inherit;
-    font-size:30px;         
+    font-size:30px;
+    text-align: center;         
     color: black;  
+}
+
+.plugin-text-area:hover{
+    color:white;
 }
 
