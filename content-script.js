@@ -3,10 +3,11 @@
 'use strict';
 
 // todo get font working http://stackoverflow.com/questions/12015074/adding-font-face-stylesheet-rules-to-chrome-extension
+// todo: prevent observer from replacing div text...
+// todo: hook up save functionality...
+
 // use IDs instead of classes for better css specificity 
 // use place holder text on inputs instead of text values..
-// publish app
-// polish styles
 
 class SettingsService {
     constructor(SettingsDataAccess) {
@@ -52,6 +53,11 @@ class SettingsService {
         // console.info(`plugin took ${performance.now() - start} ms on execution #${this.timesInvoked++}`);
     }
 
+    PrintOneLetterAtATime(message, cssElement) {
+        // https://stackoverflow.com/questions/7264974/show-text-letter-by-letter
+        return message;
+    }
+
     DisplaySettings() {
 
         let popup = document.getElementById(this.cssElements.popup);
@@ -60,10 +66,9 @@ class SettingsService {
 
         let settingsFromDb = this.db.GetSettings(), spans = "";
 
-        Object.keys(settingsFromDb).forEach(word => {
-            // todo: get rid of wrapper span
+        Object.keys(settingsFromDb).forEach(word => {            
             // todo: something like definition == settingsFromDb[settingsFromDb.length] ? and : ""
-            spans += `<span class=""> <span id="${word}" class="${this.cssElements.spanLeft}"> ${word} </span> is <span id="${settingsFromDb[word]}" class="${this.cssElements.spanRight}"> ${settingsFromDb[word]} </span> and </span>`;
+            spans += `<span id="${word}" class="${this.cssElements.spanLeft}"> ${word} </span> is <span id="${settingsFromDb[word]}" class="${this.cssElements.spanRight}"> ${settingsFromDb[word]} </span> and`;
         });
 
         popup = document.createElement("div");
@@ -76,29 +81,28 @@ class SettingsService {
 
             <div class=""> 
             
-                <input id=${this.cssElements.textBoxLeft} class="${this.cssElements.textBoxLeft}" type="text" value="Life"/>
+               <input id=${this.cssElements.textBoxLeft} class="${this.cssElements.textBoxLeft}" type="text" value="Life"/>
 
-                is
+               is
 
                <input id=${this.cssElements.textBoxRight} class="${this.cssElements.textBoxRight}" type="text" value="A Dream"/>
 
-               <button id=${this.cssElements.updateButton} class="${this.cssElements.updateButton}"> Update </button>
+               <button id=${this.cssElements.updateButton} class="${this.cssElements.updateButton}"> => Click Here To Save </button>
 
             </div>
 
             <div>
                 <img class="${this.cssElements.imageLarge}" src="${chrome.extension ? chrome.extension.getURL("icon-large.png") : "icon-large.png"}"/>
 
-                <button id=${this.cssElements.saveButton} class="${this.cssElements.saveButton}"> Stay Strange, </button>
+                <button id=${this.cssElements.saveButton} class="${this.cssElements.saveButton}"> Click Here To Exit </button>
             </div>
 
-            <textarea class="${this.cssElements.textArea}"> ${this.db.GetNotes()} </textarea>
+            <textarea id="${this.cssElements.textArea}" class="${this.cssElements.textArea}"> ${this.db.GetNotes()} </textarea>
 
          </div>`;
 
         document.body.appendChild(popup);
 
-        //todo: use popup instead of searching document
         this.textBoxLeft = document.getElementById(this.cssElements.textBoxLeft);
         this.textBoxRight = document.getElementById(this.cssElements.textBoxRight);
         this.updateButton = document.getElementById(this.cssElements.updateButton);
@@ -112,19 +116,15 @@ class SettingsService {
 
         Array.from(document.getElementsByClassName(this.cssElements.spanLeft)).forEach(span => {
             span.addEventListener("click", () => {
-
                 this.textBoxLeft.value = span.innerHTML;
-                this.updateButton.style.visibility = ""; // todo: why doesn't input event listener fire?
-
+                this.updateButton.style.visibility = ""; // todo: why doesn't modifying the value trigger the input event listener above?
             });
         });
 
         Array.from(document.getElementsByClassName(this.cssElements.spanRight)).forEach(span => {
             span.addEventListener("click", () => {
-
                 this.textBoxRight.value = span.innerHTML;
                 this.updateButton.style.visibility = "";
-
             });
         });
 
@@ -140,29 +140,27 @@ class SettingsService {
     UpdateSetting() {
         this.updateButton.style.visibility = "hidden";
 
-        let span = document.getElementById(this.textBoxLeft.value);
+        let identifier = this.textBoxLeft.value;        
+        let span = document.getElementById(identifier);
         let isNew = !span;
+        
+        if (isNew) span = document.createElement("span");
+        
+        let settings = this.db.GetSettings();        
+        if(settings[identifier]) // todo: update the database... 
+        // if key value pair collide, set text box to say something
+        
+        span.innerHTML =
+            `<span id=${identifier} class="${this.cssElements.spanLeft}"> ${identifier} </span> is
+            <span id=${this.textBoxRight.value} class="${this.cssElements.spanRight}"> ${this.textBoxRight.value} </span> and`;
 
-        console.log("Span: ", span);
-        if(isNew) span = document.createElement("span");
-
-        // todo update the database... 
-
-        span.innerHTML = 
-        `<span class=""> 
-            <span id=${this.textBoxLeft.value} class="${this.cssElements.spanLeft}"> ${this.textBoxLeft.value} </span> is
-            <span id=${this.textBoxRight.value} class="${this.cssElements.spanRight}"> ${this.textBoxRight.value} </span> and
-        </span>`;
-
-        if(isNew) this.marquee.appendChild(span);            
+        if (isNew) this.marquee.appendChild(span);
     }
 
-    SlowlyTypeOut(message, cssElement){
-        // https://stackoverflow.com/questions/7264974/show-text-letter-by-letter
-        return message;
-    } 
-
     SaveSettings() {
+        let notes = document.getElementById(this.cssElements.textArea);
+        this.db.UpdateNotes(notes.value);
+
         let popup = document.getElementById(this.cssElements.popup);
         popup.style.visibility = "hidden"; // hide
     }
@@ -208,6 +206,6 @@ class SettingsDataAccess {
     }
 
     UpdateNotes(notes) {
-        localStorage.setItem(this.notesKey, settings);
+        localStorage.setItem(this.notesKey, notes);
     }
 }
