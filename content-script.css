@@ -22,29 +22,32 @@
     color: white;  
 }
 
+.plugin-marquee{
+    font-size: 29px;
+}
+
 .plugin-span-left, 
 .plugin-span-right{
     color:black;
+    font-size: 30px;
+}
+
+.plugin-text-box-left,
+.plugin-text-box-right{
+    outline: none;
+    border: 0px none;
+    background: transparent;
+    font: inherit;
+    font-size:30px;         
+    color: black;  
 }
 
 .plugin-text-box-left{
     text-align: right;
-    outline: none;
-    border: 0px none;
-    background: transparent;
-    font: inherit;
-    font-size:30px;         
-    color: black;       
 }
 
 .plugin-text-box-right{
-    text-align: left;
-    outline: none;
-    border: 0px none;
-    background: transparent;
-    font: inherit;
-    font-size:30px;         
-    color: black;       
+    text-align: left;      
 }
 
 .plugin-span-left:hover,
@@ -79,7 +82,7 @@
      font: inherit;    
      color: inherit;
      cursor: pointer;
-     font-size: 70px;
+     font-size: 1em;
      width: 60%;
      float: right;     
 }

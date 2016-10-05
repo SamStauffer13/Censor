@@ -1,6 +1,6 @@
 // todo: transpile and minify js, point manifest at transpiled files
 
-'use strict';
+// 'use strict';
 
 // todo get font working http://stackoverflow.com/questions/12015074/adding-font-face-stylesheet-rules-to-chrome-extension
 // todo: prevent observer from replacing div text...
@@ -18,6 +18,7 @@ class SettingsService {
         this.cssElements =
             {
                 popup: "plugin-popup",
+                marquee: "plugin-marquee",
                 spanLeft: "plugin-span-left",
                 spanRight: "plugin-span-right",
                 textBoxLeft: "plugin-text-box-left",
@@ -34,7 +35,8 @@ class SettingsService {
         if (chrome.runtime.onMessage) chrome.runtime.onMessage.addListener((request, sender, sendResponse) => { if (request.displaySettings) plugin.DisplaySettings(); });
 
         // todo: research way to optimize this without N+1 looping + limit to run only once a second
-        new MutationObserver(mutations => { this.ApplySettings(); }).observe(document.body, { childList: true });
+        this.observer = new MutationObserver(mutations => { this.ApplySettings(); });
+        this.observer.observe(document.body, { childList: true });
     }
 
     ApplySettings(domToParse = document.body) {
@@ -60,13 +62,15 @@ class SettingsService {
 
     DisplaySettings() {
 
+        this.observer.disconnect();
+
         let popup = document.getElementById(this.cssElements.popup);
 
         if (popup) return popup.style.visibility = popup.style.visibility ? "" : "hidden"; // show / hide
 
         let settingsFromDb = this.db.GetSettings(), spans = "";
 
-        Object.keys(settingsFromDb).forEach(word => {            
+        Object.keys(settingsFromDb).forEach(word => {
             // todo: something like definition == settingsFromDb[settingsFromDb.length] ? and : ""
             spans += `<span id="${word}" class="${this.cssElements.spanLeft}"> ${word} </span> is <span id="${settingsFromDb[word]}" class="${this.cssElements.spanRight}"> ${settingsFromDb[word]} </span> and`;
         });
@@ -77,7 +81,7 @@ class SettingsService {
 
             `<div id=${this.cssElements.popup} class="${this.cssElements.popup}">
 
-            <marquee id=${this.cssElements.marquee} class="${this.cssElements.marquee}"> ${spans} </marquee>
+            <marquee scrollamount="20" id=${this.cssElements.marquee} class="${this.cssElements.marquee}"> ${spans} </marquee>
 
             <div class=""> 
             
@@ -109,6 +113,7 @@ class SettingsService {
         this.saveButton = document.getElementById(this.cssElements.saveButton);
         this.marquee = document.getElementById(this.cssElements.marquee);
 
+        // todo: on keypress, check if word is something we support, then show button, else, populate box;
         this.textBoxLeft.addEventListener("input", () => this.updateButton.style.visibility = "");
         this.textBoxRight.addEventListener("input", () => this.updateButton.style.visibility = "");
 
@@ -138,21 +143,31 @@ class SettingsService {
     }
 
     UpdateSetting() {
+
         this.updateButton.style.visibility = "hidden";
 
-        let identifier = this.textBoxLeft.value;        
+        let identifier = this.textBoxLeft.value;
         let span = document.getElementById(identifier);
         let isNew = !span;
-        
+
+
+        if (this.textBoxLeft.value == "Sam Stauffer") this.textBoxRight.value = "Sexy";
+
+        let settings = this.db.GetSettings();
+
+        Object.keys(settings).forEach( key => {
+
+            // todo: would be better experience to do this as they type the word and just disable the box and button
+            if (this.textBoxLeft.value == settings[key]) this.textBoxRight.value = "Currently In Use";
+
+        });
+
         if (isNew) span = document.createElement("span");
-        
-        let settings = this.db.GetSettings();        
-        if(settings[identifier]) // todo: update the database... 
-        // if key value pair collide, set text box to say something
-        
-        span.innerHTML =
-            `<span id=${identifier} class="${this.cssElements.spanLeft}"> ${identifier} </span> is
-            <span id=${this.textBoxRight.value} class="${this.cssElements.spanRight}"> ${this.textBoxRight.value} </span> and`;
+
+        let newSpan = `<span id="${this.textBoxLeft.value}" class="${this.cssElements.spanLeft}"> ${this.textBoxLeft.value} </span> is
+            <span id="${this.textBoxRight.value}" class="${this.cssElements.spanRight}"> ${this.textBoxRight.value} </span> and`;
+
+        span.innerHTML = newSpan;
 
         if (isNew) this.marquee.appendChild(span);
     }
