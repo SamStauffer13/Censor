@@ -3,10 +3,8 @@
 'use strict';
 
 // todo get font working http://stackoverflow.com/questions/12015074/adding-font-face-stylesheet-rules-to-chrome-extension
-// use IDs instead of classes for better specificity 
-// use place holder text on inputs instead of text values.. 
-// get on clicks of spans to populate boxes
-// get save button hooked up
+// use IDs instead of classes for better css specificity 
+// use place holder text on inputs instead of text values..
 // publish app
 // polish styles
 
@@ -63,8 +61,9 @@ class SettingsService {
         let settingsFromDb = this.db.GetSettings(), spans = "";
 
         Object.keys(settingsFromDb).forEach(word => {
+            // todo: get rid of wrapper span
             // todo: something like definition == settingsFromDb[settingsFromDb.length] ? and : ""
-            spans += `<span class=""> <span id=${this.cssElements.spanLeft} class="${this.cssElements.spanLeft}"> ${word} </span> is <span id=${this.cssElements.spanRight} class="${this.cssElements.spanRight}"> ${settingsFromDb[word]} </span> and </span>`;
+            spans += `<span class=""> <span id="${word}" class="${this.cssElements.spanLeft}"> ${word} </span> is <span id="${settingsFromDb[word]}" class="${this.cssElements.spanRight}"> ${settingsFromDb[word]} </span> and </span>`;
         });
 
         popup = document.createElement("div");
@@ -73,7 +72,7 @@ class SettingsService {
 
             `<div id=${this.cssElements.popup} class="${this.cssElements.popup}">
 
-            <marquee class="${this.cssElements.marquee}"> ${spans} </marquee>
+            <marquee id=${this.cssElements.marquee} class="${this.cssElements.marquee}"> ${spans} </marquee>
 
             <div class=""> 
             
@@ -100,26 +99,22 @@ class SettingsService {
         document.body.appendChild(popup);
 
         //todo: use popup instead of searching document
-        let textBoxLeft = document.getElementById(this.cssElements.textBoxLeft);
-        let textBoxRight = document.getElementById(this.cssElements.textBoxRight);
-        let updateButton = document.getElementById(this.cssElements.updateButton);
-        let saveButton = document.getElementById(this.cssElements.saveButton);
+        this.textBoxLeft = document.getElementById(this.cssElements.textBoxLeft);
+        this.textBoxRight = document.getElementById(this.cssElements.textBoxRight);
+        this.updateButton = document.getElementById(this.cssElements.updateButton);
+        this.saveButton = document.getElementById(this.cssElements.saveButton);
+        this.marquee = document.getElementById(this.cssElements.marquee);
 
-        textBoxLeft.addEventListener("input", () => updateButton.style.visibility = "");
-        textBoxRight.addEventListener("input", () => updateButton.style.visibility = "");
+        this.textBoxLeft.addEventListener("input", () => this.updateButton.style.visibility = "");
+        this.textBoxRight.addEventListener("input", () => this.updateButton.style.visibility = "");
 
-        updateButton.addEventListener("click", () => {
-
-            this.UpdateSettings();
-            updateButton.style.visibility = "hidden";
-
-        });
+        this.updateButton.addEventListener("click", () => this.UpdateSetting());
 
         Array.from(document.getElementsByClassName(this.cssElements.spanLeft)).forEach(span => {
             span.addEventListener("click", () => {
 
-                textBoxLeft.value = span.innerHTML;
-                updateButton.style.visibility = ""; // todo: why doesn't input event listener fire?
+                this.textBoxLeft.value = span.innerHTML;
+                this.updateButton.style.visibility = ""; // todo: why doesn't input event listener fire?
 
             });
         });
@@ -127,20 +122,45 @@ class SettingsService {
         Array.from(document.getElementsByClassName(this.cssElements.spanRight)).forEach(span => {
             span.addEventListener("click", () => {
 
-                textBoxRight.value = span.innerHTML;
-                updateButton.style.visibility = "";
-                 
+                this.textBoxRight.value = span.innerHTML;
+                this.updateButton.style.visibility = "";
+
             });
         });
 
-        saveButton.addEventListener("click", () => this.SaveSettings());
-        saveButton.addEventListener("mouseover", () => saveButton.innerHTML = "Save & Exit");
-        saveButton.addEventListener("mouseout", () => saveButton.innerHTML = "Stay Strange");
+        this.saveButton.addEventListener("click", () => this.SaveSettings());
+        // this.saveButton.addEventListener("mouseover", () => this.saveButton.innerHTML = "Save & Exit");
+        // this.saveButton.addEventListener("mouseout", () => this.saveButton.innerHTML = "Stay Strange");
     }
 
-    UpdateSettings() {
+    DeleteSetting() {
 
     }
+
+    UpdateSetting() {
+        this.updateButton.style.visibility = "hidden";
+
+        let span = document.getElementById(this.textBoxLeft.value);
+        let isNew = !span;
+
+        console.log("Span: ", span);
+        if(isNew) span = document.createElement("span");
+
+        // todo update the database... 
+
+        span.innerHTML = 
+        `<span class=""> 
+            <span id=${this.textBoxLeft.value} class="${this.cssElements.spanLeft}"> ${this.textBoxLeft.value} </span> is
+            <span id=${this.textBoxRight.value} class="${this.cssElements.spanRight}"> ${this.textBoxRight.value} </span> and
+        </span>`;
+
+        if(isNew) this.marquee.appendChild(span);            
+    }
+
+    SlowlyTypeOut(message, cssElement){
+        // https://stackoverflow.com/questions/7264974/show-text-letter-by-letter
+        return message;
+    } 
 
     SaveSettings() {
         let popup = document.getElementById(this.cssElements.popup);
