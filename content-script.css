@@ -57,6 +57,7 @@
          color: white;
 }
 
+.plugin-delete-button,
 .plugin-update-button{
      background:none!important;
      border:none; 
@@ -86,7 +87,8 @@
      width: 60%;
      float: right;     
 }
-
+.plugin-delete-button:hover,
+.plugin-update-button:hover,
 .plugin-save-button:hover{        
      color: black;     
 }

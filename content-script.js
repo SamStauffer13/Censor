@@ -3,11 +3,12 @@
 // 'use strict';
 
 // todo get font working http://stackoverflow.com/questions/12015074/adding-font-face-stylesheet-rules-to-chrome-extension
-// todo: prevent observer from replacing div text...
-// todo: hook up save functionality...
-
-// use IDs instead of classes for better css specificity 
+// use IDs instead of classes for better css specificity
 // use place holder text on inputs instead of text values..
+// fix trailing and issue
+// clear text boxes on focus  
+// hook up delete
+// get printer function working
 
 class SettingsService {
     constructor(SettingsDataAccess) {
@@ -26,6 +27,7 @@ class SettingsService {
                 textBoxLeft: "plugin-text-box-left",
                 textBoxRight: "plugin-text-box-right",
                 updateButton: "plugin-update-button",
+                deleteButton: "plugin-delete-button",
                 imageLarge: "plugin-image-large",
                 saveButton: "plugin-save-button",
                 textArea: "plugin-text-area"
@@ -35,17 +37,19 @@ class SettingsService {
 
         if (chrome.runtime.onMessage) chrome.runtime.onMessage.addListener((request, sender, sendResponse) => { if (request.displaySettings) plugin.DisplaySettings(); });
 
-        // todo: research way to optimize this without N+1 looping + limit to run only once a second
-        this.observer = new MutationObserver(mutations => {            
-            mutations.forEach( mutation => {
 
-                let nodes = mutation.addedNodes[0];                
-                // todo: test performance of this + get rid of parent div if possible
-                if (nodes && nodes.firstChild && nodes.firstChild.id != this.cssElements.popup) this.ApplySettings();
+        new MutationObserver(mutations => {
+
+            // todo: limit to run only once a second
+            mutations.forEach(mutation => {
+
+                // todo: remove div parent if possible
+                let isLegit = mutation.addedNodes[0] && mutation.addedNodes[0].firstChild && mutation.addedNodes[0].firstChild.id != this.cssElements.popup;
+                if (isLegit) this.ApplySettings();
+
             });
-        });
 
-        this.observer.observe(document.body, { childList: true });
+        }).observe(document.body, { childList: true });
     }
 
     ApplySettings(domToParse = document.body) {
@@ -61,7 +65,7 @@ class SettingsService {
 
         }
 
-         console.info(`plugin took ${performance.now() - start} ms on execution #${this.timesInvoked++}`);
+        console.info(`plugin took ${performance.now() - start} ms on execution #${this.timesInvoked++}`);
     }
 
     PrintOneLetterAtATime(message, cssElement) {
@@ -71,16 +75,15 @@ class SettingsService {
 
     DisplaySettings() {
 
-        this.observer.disconnect();
-
         let popup = document.getElementById(this.cssElements.popup);
 
         if (popup) return popup.style.visibility = popup.style.visibility ? "" : "hidden"; // show / hide
 
-        let settingsFromDb = this.db.GetSettings(), spans = "";
+        let settingsFromDb = this.db.GetSettings(), spans = "", existingSettings = [];
 
         Object.keys(settingsFromDb).forEach(word => {
             // todo: something like definition == settingsFromDb[settingsFromDb.length] ? and : ""
+            existingSettings.push(settingsFromDb[word])
             spans += `<span id="${word}" class="${this.cssElements.spanLeft}"> ${word} </span> is <span id="${settingsFromDb[word]}" class="${this.cssElements.spanRight}"> ${settingsFromDb[word]} </span> and`;
         });
 
@@ -100,14 +103,15 @@ class SettingsService {
 
                <input id=${this.cssElements.textBoxRight} class="${this.cssElements.textBoxRight}" type="text" value="A Dream"/>
 
-               <button id=${this.cssElements.updateButton} class="${this.cssElements.updateButton}"> Apply Changes </button>
+               <button id=${this.cssElements.updateButton} class="${this.cssElements.updateButton}"> Save </button>
+               <button id=${this.cssElements.deleteButton} class="${this.cssElements.deleteButton}"> Delete </button>
 
             </div>
 
             <div>
                 <img class="${this.cssElements.imageLarge}" src="${chrome.extension ? chrome.extension.getURL("icon-large.png") : "icon-large.png"}"/>
 
-                <button id=${this.cssElements.saveButton} class="${this.cssElements.saveButton}"> Click Here To Exit </button>
+                <button id=${this.cssElements.saveButton} class="${this.cssElements.saveButton}"> Exit </button>
             </div>
 
             <textarea id="${this.cssElements.textArea}" class="${this.cssElements.textArea}"> ${this.db.GetNotes()} </textarea>
@@ -119,6 +123,12 @@ class SettingsService {
         this.marquee = document.getElementById(this.cssElements.marquee);
         this.textBoxLeft = document.getElementById(this.cssElements.textBoxLeft);
         this.textBoxRight = document.getElementById(this.cssElements.textBoxRight);
+        this.textBoxRight.disable = message => {
+
+            this.textBoxRight.value = message;
+            this.textBoxRight.disabled = true;
+
+        }
         this.saveButton = document.getElementById(this.cssElements.saveButton);
         this.saveButton.onclick = () => this.SaveSettings();
         this.updateButton = document.getElementById(this.cssElements.updateButton);
@@ -126,13 +136,19 @@ class SettingsService {
         this.updateButton.hide = () => this.updateButton.style.visibility = "hidden";
         this.updateButton.onclick = () => this.UpdateSetting();
 
+        this.textBoxLeft.onfocus = () => {
+
+        }
+
         this.textBoxLeft.onkeyup = () => {
 
-            // todo once map conversion is complete use this:
-            // let chaos = Object.Values(settingsFromDb)[this.textBoxLeft.value];
-            // if (chaos) return this.textBoxRight.value = "In Use";
+            if(this.textBoxLeft.value === "") return;
 
-            if (this.textBoxLeft.value == this.admin) this.textBoxRight.value = "Sexy";
+            if (existingSettings.includes(this.textBoxLeft.value)) return this.textBoxRight.disable("in use");
+
+            if (this.textBoxLeft.value == this.admin) return this.textBoxRight.disable("sexy")
+
+            this.textBoxRight.disabled = false;
 
             this.updateButton.show();
         };
@@ -170,8 +186,6 @@ class SettingsService {
         let span = document.getElementById(this.textBoxLeft.value);
         let isNew = !span;
 
-        if (this.textBoxLeft.value == this.admin) this.textBoxRight.value = "Sexy";
-
         let settings = this.db.GetSettings();
 
         settings[this.textBoxLeft.value] = this.textBoxRight.value;
@@ -206,13 +220,13 @@ class SettingsDataAccess {
 
         this.defaultSettings = { "Donald Trump": "A Mad Scientist", "Hillary Clinton": "A Six Foot Tall Giant Robot" }; // todo refactor this to use a map instead of key value object
         // this.defaultSettings = new Map().set("Donald Trump", "A Mad Scientist").set("Hillary Clinton", "A Six Foot Tall Giant Robot");
-        this.defaultNotes = "My spirit animal comes in a pretzel bun";
+        this.defaultNotes = "You can use this space to take notes if you want, the'll be saved when you click the Exit button ";
     }
 
     GetSettings() {
 
         let settings = localStorage.getItem(this.storageKey);
-        
+
         try {
             // return new Map(JSON.parse(settings));
             let parsed = JSON.parse(settings);
