@@ -12,6 +12,8 @@
 class SettingsService {
     constructor(SettingsDataAccess) {
 
+        this.admin = "Sam Stauffer";
+
         this.db = SettingsDataAccess;
         this.timesInvoked = 1;
 
@@ -29,13 +31,20 @@ class SettingsService {
                 textArea: "plugin-text-area"
             }
 
-        this.ApplySettings();
+        this.ApplySettings(); // on startup
 
-        // todo: pass in chrome API as dependency and mock it in the unit tests 
         if (chrome.runtime.onMessage) chrome.runtime.onMessage.addListener((request, sender, sendResponse) => { if (request.displaySettings) plugin.DisplaySettings(); });
 
         // todo: research way to optimize this without N+1 looping + limit to run only once a second
-        this.observer = new MutationObserver(mutations => { this.ApplySettings(); });
+        this.observer = new MutationObserver(mutations => {            
+            mutations.forEach( mutation => {
+
+                let nodes = mutation.addedNodes[0];                
+                // todo: test performance of this + get rid of parent div if possible
+                if (nodes && nodes.firstChild && nodes.firstChild.id != this.cssElements.popup) this.ApplySettings();
+            });
+        });
+
         this.observer.observe(document.body, { childList: true });
     }
 
@@ -52,7 +61,7 @@ class SettingsService {
 
         }
 
-        // console.info(`plugin took ${performance.now() - start} ms on execution #${this.timesInvoked++}`);
+         console.info(`plugin took ${performance.now() - start} ms on execution #${this.timesInvoked++}`);
     }
 
     PrintOneLetterAtATime(message, cssElement) {
@@ -81,7 +90,7 @@ class SettingsService {
 
             `<div id=${this.cssElements.popup} class="${this.cssElements.popup}">
 
-            <marquee scrollamount="20" id=${this.cssElements.marquee} class="${this.cssElements.marquee}"> ${spans} </marquee>
+            <marquee scrollamount="15" id=${this.cssElements.marquee} class="${this.cssElements.marquee}"> ${spans} </marquee>
 
             <div class=""> 
             
@@ -91,7 +100,7 @@ class SettingsService {
 
                <input id=${this.cssElements.textBoxRight} class="${this.cssElements.textBoxRight}" type="text" value="A Dream"/>
 
-               <button id=${this.cssElements.updateButton} class="${this.cssElements.updateButton}"> => Click Here To Save </button>
+               <button id=${this.cssElements.updateButton} class="${this.cssElements.updateButton}"> Apply Changes </button>
 
             </div>
 
@@ -107,35 +116,47 @@ class SettingsService {
 
         document.body.appendChild(popup);
 
+        this.marquee = document.getElementById(this.cssElements.marquee);
         this.textBoxLeft = document.getElementById(this.cssElements.textBoxLeft);
         this.textBoxRight = document.getElementById(this.cssElements.textBoxRight);
-        this.updateButton = document.getElementById(this.cssElements.updateButton);
         this.saveButton = document.getElementById(this.cssElements.saveButton);
-        this.marquee = document.getElementById(this.cssElements.marquee);
+        this.saveButton.onclick = () => this.SaveSettings();
+        this.updateButton = document.getElementById(this.cssElements.updateButton);
+        this.updateButton.show = () => this.updateButton.style.visibility = "";
+        this.updateButton.hide = () => this.updateButton.style.visibility = "hidden";
+        this.updateButton.onclick = () => this.UpdateSetting();
 
-        // todo: on keypress, check if word is something we support, then show button, else, populate box;
-        this.textBoxLeft.addEventListener("input", () => this.updateButton.style.visibility = "");
-        this.textBoxRight.addEventListener("input", () => this.updateButton.style.visibility = "");
+        this.textBoxLeft.onkeyup = () => {
 
-        this.updateButton.addEventListener("click", () => this.UpdateSetting());
+            // todo once map conversion is complete use this:
+            // let chaos = Object.Values(settingsFromDb)[this.textBoxLeft.value];
+            // if (chaos) return this.textBoxRight.value = "In Use";
+
+            if (this.textBoxLeft.value == this.admin) this.textBoxRight.value = "Sexy";
+
+            this.updateButton.show();
+        };
+
+        this.textBoxRight.oninput = () => this.updateButton.show();
 
         Array.from(document.getElementsByClassName(this.cssElements.spanLeft)).forEach(span => {
-            span.addEventListener("click", () => {
+
+            span.onclick = () => {
                 this.textBoxLeft.value = span.innerHTML;
-                this.updateButton.style.visibility = ""; // todo: why doesn't modifying the value trigger the input event listener above?
-            });
+                this.updateButton.show();
+            }
+
         });
 
         Array.from(document.getElementsByClassName(this.cssElements.spanRight)).forEach(span => {
-            span.addEventListener("click", () => {
+
+            span.onclick = () => {
                 this.textBoxRight.value = span.innerHTML;
-                this.updateButton.style.visibility = "";
-            });
+                this.updateButton.show();
+            };
+
         });
 
-        this.saveButton.addEventListener("click", () => this.SaveSettings());
-        // this.saveButton.addEventListener("mouseover", () => this.saveButton.innerHTML = "Save & Exit");
-        // this.saveButton.addEventListener("mouseout", () => this.saveButton.innerHTML = "Stay Strange");
     }
 
     DeleteSetting() {
@@ -144,23 +165,18 @@ class SettingsService {
 
     UpdateSetting() {
 
-        this.updateButton.style.visibility = "hidden";
+        this.updateButton.hide();
 
-        let identifier = this.textBoxLeft.value;
-        let span = document.getElementById(identifier);
+        let span = document.getElementById(this.textBoxLeft.value);
         let isNew = !span;
 
-
-        if (this.textBoxLeft.value == "Sam Stauffer") this.textBoxRight.value = "Sexy";
+        if (this.textBoxLeft.value == this.admin) this.textBoxRight.value = "Sexy";
 
         let settings = this.db.GetSettings();
 
-        Object.keys(settings).forEach( key => {
+        settings[this.textBoxLeft.value] = this.textBoxRight.value;
 
-            // todo: would be better experience to do this as they type the word and just disable the box and button
-            if (this.textBoxLeft.value == settings[key]) this.textBoxRight.value = "Currently In Use";
-
-        });
+        this.db.UpdateSettings(settings);
 
         if (isNew) span = document.createElement("span");
 
@@ -196,14 +212,14 @@ class SettingsDataAccess {
     GetSettings() {
 
         let settings = localStorage.getItem(this.storageKey);
-
+        
         try {
             // return new Map(JSON.parse(settings));
             let parsed = JSON.parse(settings);
             if (parsed && typeof parsed === 'object') return parsed;
         }
         catch (error) {
-            // console.warn(`${error.message} while parsing: ${settings}`);
+            console.warn(`${error.message} while parsing: ${settings}`);
         }
 
         return this.defaultSettings;
