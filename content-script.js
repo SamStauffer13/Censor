@@ -2,13 +2,10 @@
 
 // 'use strict';
 
-// todo get font working http://stackoverflow.com/questions/12015074/adding-font-face-stylesheet-rules-to-chrome-extension
+// get printer function working
 // use IDs instead of classes for better css specificity
 // use place holder text on inputs instead of text values..
-// fix trailing and issue
-// clear text boxes on focus  
 // hook up delete
-// get printer function working
 
 class SettingsService {
     constructor(SettingsDataAccess) {
@@ -65,7 +62,8 @@ class SettingsService {
 
         }
 
-        console.info(`plugin took ${performance.now() - start} ms on execution #${this.timesInvoked++}`);
+        // future state - option to replace keywords with black bars 
+        // console.info(`plugin took ${performance.now() - start} ms on execution #${this.timesInvoked++}`);
     }
 
     PrintOneLetterAtATime(message, cssElement) {
@@ -79,12 +77,20 @@ class SettingsService {
 
         if (popup) return popup.style.visibility = popup.style.visibility ? "" : "hidden"; // show / hide
 
-        let settingsFromDb = this.db.GetSettings(), spans = "", existingSettings = [];
+        let settingsFromDb = this.db.GetSettings(),
+            keys = Object.keys(settingsFromDb),
+            values = [],
+            spans = "";
 
-        Object.keys(settingsFromDb).forEach(word => {
-            // todo: something like definition == settingsFromDb[settingsFromDb.length] ? and : ""
-            existingSettings.push(settingsFromDb[word])
-            spans += `<span id="${word}" class="${this.cssElements.spanLeft}"> ${word} </span> is <span id="${settingsFromDb[word]}" class="${this.cssElements.spanRight}"> ${settingsFromDb[word]} </span> and`;
+        keys.forEach(word => {
+
+            let value = settingsFromDb[word];
+
+            values.push(value);
+
+            let trailingAnd = word == keys[keys.length - 1] ? "" : "and";
+
+            spans += `<span id="${word}" class="${this.cssElements.spanLeft}"> ${word} </span> is <span id="${value}" class="${this.cssElements.spanRight}"> ${value} </span> ${trailingAnd}`;
         });
 
         popup = document.createElement("div");
@@ -136,17 +142,35 @@ class SettingsService {
         this.updateButton.hide = () => this.updateButton.style.visibility = "hidden";
         this.updateButton.onclick = () => this.UpdateSetting();
 
-        this.textBoxLeft.onfocus = () => {
+        let previousValueL = this.textBoxLeft.value;
+        this.textBoxLeft.onmouseover = () => {
 
+            this.textBoxLeft.focus();
+            if (this.textBoxLeft.value == previousValueL) this.textBoxLeft.value = "";
+
+        }
+        this.textBoxLeft.onmouseout = () => {
+            if (this.textBoxLeft.value == "") this.textBoxLeft.value = previousValueL;
+        }
+
+        let previousValueR = this.textBoxRight.value;
+        this.textBoxRight.onmouseover = () => {
+
+            this.textBoxRight.focus();
+            if (this.textBoxRight.value == previousValueR) this.textBoxRight.value = "";
+
+        }
+        this.textBoxRight.onmouseout = () => {
+            if (this.textBoxRight.value == "") this.textBoxRight.value = previousValueR;
         }
 
         this.textBoxLeft.onkeyup = () => {
 
-            if(this.textBoxLeft.value === "") return;
+            if (this.textBoxLeft.value === "") return;
 
-            if (existingSettings.includes(this.textBoxLeft.value)) return this.textBoxRight.disable("in use");
+            if (values.includes(this.textBoxLeft.value)) return this.textBoxRight.disable("paradoxical");
 
-            if (this.textBoxLeft.value == this.admin) return this.textBoxRight.disable("sexy")
+            if (this.textBoxLeft.value == this.admin) return this.textBoxRight.disable("sexy");
 
             this.textBoxRight.disabled = false;
 
@@ -194,8 +218,8 @@ class SettingsService {
 
         if (isNew) span = document.createElement("span");
 
-        let newSpan = `<span id="${this.textBoxLeft.value}" class="${this.cssElements.spanLeft}"> ${this.textBoxLeft.value} </span> is
-            <span id="${this.textBoxRight.value}" class="${this.cssElements.spanRight}"> ${this.textBoxRight.value} </span> and`;
+        let newSpan = `and <span id="${this.textBoxLeft.value}" class="${this.cssElements.spanLeft}"> ${this.textBoxLeft.value} </span> is
+            <span id="${this.textBoxRight.value}" class="${this.cssElements.spanRight}"> ${this.textBoxRight.value} </span>`;
 
         span.innerHTML = newSpan;
 
