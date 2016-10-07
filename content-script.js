@@ -1,14 +1,15 @@
-// todo: transpile and minify js, point manifest at transpiled files
+// todo: get printer function working
+// todo: buttons only show on change, use display:none instead of "visibility"
+// todo: target element then ID instead of generic class for better css specificity : https://developer.mozilla.org/en-US/docs/Web/CSS/Specificity
+// todo: use place holder text on inputs instead of text values...
+// todo: hook up delete functionality
+// todo: transpile and minify js, point manifest at transpiled files 
 
-// 'use strict';
-
-// get printer function working
-// use IDs instead of classes for better css specificity
-// use place holder text on inputs instead of text values..
-// hook up delete
+'use strict';
 
 class SettingsService {
-    constructor(SettingsDataAccess) {
+
+        constructor(SettingsDataAccess) {
 
         this.admin = "Sam Stauffer";
 
@@ -77,20 +78,21 @@ class SettingsService {
 
         if (popup) return popup.style.visibility = popup.style.visibility ? "" : "hidden"; // show / hide
 
+        // todo: refactor this into more digestible chunks
         let settingsFromDb = this.db.GetSettings(),
             keys = Object.keys(settingsFromDb),
             values = [],
             spans = "";
 
-        keys.forEach(word => {
+        keys.forEach(key => {
 
-            let value = settingsFromDb[word];
+            let value = settingsFromDb[key];
 
             values.push(value);
 
-            let trailingAnd = word == keys[keys.length - 1] ? "" : "and";
+            let trailingAnd = key == keys[keys.length - 1] ? "" : "and";
 
-            spans += `<span id="${word}" class="${this.cssElements.spanLeft}"> ${word} </span> is <span id="${value}" class="${this.cssElements.spanRight}"> ${value} </span> ${trailingAnd}`;
+            spans += `<span id="${key}" class="${this.cssElements.spanLeft}"> ${key} </span> is <span id="${value}" class="${this.cssElements.spanRight}"> ${value} </span> ${trailingAnd}`;
         });
 
         popup = document.createElement("div");
@@ -229,6 +231,8 @@ class SettingsService {
     SaveSettings() {
         let notes = document.getElementById(this.cssElements.textArea);
         this.db.UpdateNotes(notes.value);
+        
+        this.ApplySettings();
 
         let popup = document.getElementById(this.cssElements.popup);
         popup.style.visibility = "hidden"; // hide
@@ -242,7 +246,8 @@ class SettingsDataAccess {
         this.storageKey = "7DCF8FAAC5ECB6FF17DF5487735A7";
         this.notesKey = "8B7C91137E2AFE924FBFBB3E6FE71";
 
-        this.defaultSettings = { "Donald Trump": "A Mad Scientist", "Hillary Clinton": "A Six Foot Tall Giant Robot" }; // todo refactor this to use a map instead of key value object
+         // todo refactor this to use a map instead of key value object
+        this.defaultSettings = { "Donald Trump": "A Mad Scientist", "Hillary Clinton": "A Six Foot Tall Giant Robot" };
         // this.defaultSettings = new Map().set("Donald Trump", "A Mad Scientist").set("Hillary Clinton", "A Six Foot Tall Giant Robot");
         this.defaultNotes = "You can use this space to take notes if you want, the'll be saved when you click the Exit button ";
     }
@@ -257,7 +262,7 @@ class SettingsDataAccess {
             if (parsed && typeof parsed === 'object') return parsed;
         }
         catch (error) {
-            console.warn(`${error.message} while parsing: ${settings}`);
+           // console.warn(`${error.message} while parsing: ${settings}`);
         }
 
         return this.defaultSettings;
