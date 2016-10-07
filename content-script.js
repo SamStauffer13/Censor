@@ -113,7 +113,7 @@ class SettingsService {
 
                is
 
-               <input id=${this.cssElements.textBoxRight} class="${this.cssElements.textBoxRight}" type="text" value="A Dream"/>
+               <input id=${this.cssElements.textBoxRight} class="${this.cssElements.textBoxRight}" type="text" value="Strange"/>
 
                <button id=${this.cssElements.updateButton} class="${this.cssElements.updateButton}"> Save </button>
 
@@ -134,6 +134,7 @@ class SettingsService {
         document.body.appendChild(popup);
 
         this.marquee = document.getElementById(this.cssElements.marquee);
+
         this.textBoxLeft = document.getElementById(this.cssElements.textBoxLeft);
         this.textBoxRight = document.getElementById(this.cssElements.textBoxRight);
         this.textBoxRight.disable = message => {
@@ -142,12 +143,19 @@ class SettingsService {
             this.textBoxRight.disabled = true;
 
         }
+
         this.saveButton = document.getElementById(this.cssElements.saveButton);
         this.saveButton.onclick = () => this.SaveSettings();
+        this.saveButton.onmouseover = () => this.saveButton.innerHTML = "Stay Strange";
+        this.saveButton.onmouseout = () => this.saveButton.innerHTML = "Exit";
+
         this.updateButton = document.getElementById(this.cssElements.updateButton);
         this.updateButton.show = () => this.updateButton.style.visibility = "";
         this.updateButton.hide = () => this.updateButton.style.visibility = "hidden";
         this.updateButton.onclick = () => this.UpdateSetting();
+
+        this.deleteButton = document.getElementById(this.cssElements.deleteButton);
+        this.deleteButton.onclick = () => this.DeleteSetting();
 
         let previousValueL = this.textBoxLeft.value;
         this.textBoxLeft.onmouseover = () => {
@@ -203,7 +211,6 @@ class SettingsService {
             };
 
         });
-
     }
 
     DeleteSetting() {
@@ -254,7 +261,7 @@ class SettingsDataAccess {
         // todo refactor this to use a map instead of key value object
         this.defaultSettings = { "Donald Trump": "A Mad Scientist", "Hillary Clinton": "A Six Foot Tall Giant Robot" };
         // this.defaultSettings = new Map().set("Donald Trump", "A Mad Scientist").set("Hillary Clinton", "A Six Foot Tall Giant Robot");
-        this.defaultNotes = "You can use this space to take notes if you want, the'll be saved when you click the Exit button ";
+        this.defaultNotes = "Thanks to Marat @ Thenounproject.com for creating the icons and Luke Lisi @ lisidesign.com for creating the font";
     }
 
     GetSettings() {
