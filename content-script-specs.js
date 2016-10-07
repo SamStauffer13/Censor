@@ -67,7 +67,7 @@ describe("When applying user settings, ", function () {
 
     it("the plugin will ignore capitolization and plurlization");
 
-    it("the plugin will ignore prefixs like Mr. and Mrs.", function(){
+    it("the plugin will replace words regardless of prefixs like Mr. and Mrs.", function(){
 
         pending();
 
@@ -96,11 +96,11 @@ describe("When applying user settings, ", function () {
 
     });
 
-    it("the plugin will ignored english determiners like The and A");
+    it("the plugin will replace words regardless of english determiners like The and A");
 
     it("the plugin will not replace words on the user interface");
 
-    it("the plugin will recursively utilize keywords to modify a page's contents", function () {
+    it("the plugin will replace words regardless of internal descriptives", function () {
         pending(); // take the first word and the content after it, if the content after it contains the second word, replace the whole string...
     });
 });

@@ -2,7 +2,7 @@
     "manifest_version": 2,
     "name": "To Be Determined",
     "description": "To Be Determined",
-    "version": "1.0",
+    "version": "0.0.0.1",
     "browser_action": {
         "default_icon": "icon-small.png",
         "default_title": "To Be Determined"

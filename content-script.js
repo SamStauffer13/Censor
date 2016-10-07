@@ -1,15 +1,18 @@
+// mission critical
+// todo: improve replacement algorithm
+// todo: hook up delete functionality
+// enhancements
 // todo: get printer function working
 // todo: buttons only show on change, use display:none instead of "visibility"
 // todo: target element then ID instead of generic class for better css specificity : https://developer.mozilla.org/en-US/docs/Web/CSS/Specificity
 // todo: use place holder text on inputs instead of text values...
-// todo: hook up delete functionality
 // todo: transpile and minify js, point manifest at transpiled files 
 
 'use strict';
 
 class SettingsService {
 
-        constructor(SettingsDataAccess) {
+    constructor(SettingsDataAccess) {
 
         this.admin = "Sam Stauffer";
 
@@ -58,12 +61,13 @@ class SettingsService {
 
         while (ent.nextNode()) {
 
+            // future state - option to replace keywords with black bars 
+
             // this.db.GetSettings().forEach((word, definition) => ent.currentNode.nodeValue = ent.currentNode.nodeValue.replace(word, definition); );
             Object.keys(settings).forEach(word => { ent.currentNode.nodeValue = ent.currentNode.nodeValue.replace(word, settings[word]); });
 
         }
 
-        // future state - option to replace keywords with black bars 
         // console.info(`plugin took ${performance.now() - start} ms on execution #${this.timesInvoked++}`);
     }
 
@@ -77,8 +81,8 @@ class SettingsService {
         let popup = document.getElementById(this.cssElements.popup);
 
         if (popup) return popup.style.visibility = popup.style.visibility ? "" : "hidden"; // show / hide
-
-        // todo: refactor this into more digestible chunks
+        
+        // todo: refactor into a dom generator utility and a user interaction utility
         let settingsFromDb = this.db.GetSettings(),
             keys = Object.keys(settingsFromDb),
             values = [],
@@ -112,6 +116,7 @@ class SettingsService {
                <input id=${this.cssElements.textBoxRight} class="${this.cssElements.textBoxRight}" type="text" value="A Dream"/>
 
                <button id=${this.cssElements.updateButton} class="${this.cssElements.updateButton}"> Save </button>
+
                <button id=${this.cssElements.deleteButton} class="${this.cssElements.deleteButton}"> Delete </button>
 
             </div>
@@ -231,7 +236,7 @@ class SettingsService {
     SaveSettings() {
         let notes = document.getElementById(this.cssElements.textArea);
         this.db.UpdateNotes(notes.value);
-        
+
         this.ApplySettings();
 
         let popup = document.getElementById(this.cssElements.popup);
@@ -246,7 +251,7 @@ class SettingsDataAccess {
         this.storageKey = "7DCF8FAAC5ECB6FF17DF5487735A7";
         this.notesKey = "8B7C91137E2AFE924FBFBB3E6FE71";
 
-         // todo refactor this to use a map instead of key value object
+        // todo refactor this to use a map instead of key value object
         this.defaultSettings = { "Donald Trump": "A Mad Scientist", "Hillary Clinton": "A Six Foot Tall Giant Robot" };
         // this.defaultSettings = new Map().set("Donald Trump", "A Mad Scientist").set("Hillary Clinton", "A Six Foot Tall Giant Robot");
         this.defaultNotes = "You can use this space to take notes if you want, the'll be saved when you click the Exit button ";
@@ -262,7 +267,7 @@ class SettingsDataAccess {
             if (parsed && typeof parsed === 'object') return parsed;
         }
         catch (error) {
-           // console.warn(`${error.message} while parsing: ${settings}`);
+            // console.warn(`${error.message} while parsing: ${settings}`);
         }
 
         return this.defaultSettings;
