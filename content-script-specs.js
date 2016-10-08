@@ -1,34 +1,8 @@
 // todo, use package.json to pull in jasmine instead of c/p'd files - reason is, we'll be pulling in babel and web pack via this method anyways, no reason to be inconsistent
 
-describe("When applying user settings, ", function () {
+describe("Censor will begin replace words as soon as the page loads, ", function () {
 
-    it("the plugin will replace any word on a web page with a word defined in its settings", function () {
-
-        // arrange
-        let word = 'fire ants';
-        let definition = 'spicy boys'; // support the cause: https://goo.gl/6Rl20I
-
-        let div = document.createElement("div");
-        let span = document.createElement("span");
-
-        span.innerHTML = `bla bla bla ${word} bla bla bla`;
-
-        div.appendChild(span);
-        document.body.appendChild(div);
-
-        let fakeDataAccess = new SettingsDataAccess();
-        fakeDataAccess.GetSettings = () => { return { [word]: definition }; }
-
-        // act
-        let plugin = new SettingsService(fakeDataAccess);
-
-        // assert
-        expect(span.innerHTML).toEqual(`bla bla bla ${definition} bla bla bla`);
-
-        div.remove();
-    });
-
-    it("the plugin will automatically replace words added after page load", function (done) {
+    it("and will continue to replace words after the page loads", function (done) {
 
         // uses a mutation observer https://goo.gl/iBc25q
 
@@ -65,9 +39,44 @@ describe("When applying user settings, ", function () {
         expect(true).toEqual(true);
     });
 
+    describe("By default, Censor will ...", () => {
+
+
+    });
+    
+    let integrationsTest = (wordsToTest) => {
+
+        it("and the plugin will replace any word on a web page with a word defined in its settings", function () {
+
+            // arrange
+            let word = 'fire ants';
+            let definition = 'spicy boys'; // support the cause: https://goo.gl/6Rl20I
+
+            let div = document.createElement("div");
+            let span = document.createElement("span");
+
+            span.innerHTML = `bla bla bla ${word} bla bla bla`;
+
+            div.appendChild(span);
+            document.body.appendChild(div);
+
+            let fakeDataAccess = new SettingsDataAccess();
+            fakeDataAccess.GetSettings = () => { return { [word]: definition }; }
+
+            // act
+            let plugin = new SettingsService(fakeDataAccess);
+
+            // assert
+            expect(span.innerHTML).toEqual(`bla bla bla ${definition} bla bla bla`);
+
+            div.remove();
+        });
+        
+    }
+
     it("the plugin will ignore capitolization and plurlization");
 
-    it("the plugin will replace words regardless of prefixs like Mr. and Mrs.", function(){
+    it("the plugin will replace words regardless of prefixs like Mr. and Mrs.", function () {
 
         pending();
 
@@ -149,7 +158,7 @@ describe("When displaying user settings,", function () {
         else {
 
             fail("user interface does not exist");
-            
+
         }
     });
 
