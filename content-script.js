@@ -7,6 +7,7 @@
 // todo: target element then ID instead of generic class for better css specificity : https://developer.mozilla.org/en-US/docs/Web/CSS/Specificity
 // todo: use place holder text on inputs instead of text values...
 // todo: transpile and minify js, point manifest at transpiled files 
+// todo: specify browser action function in mainfest for keyboard shortcuts : https://developer.chrome.com/extensions/commands
 
 'use strict';
 
@@ -64,7 +65,18 @@ class SettingsService {
             // future state - option to replace keywords with black bars 
 
             // this.db.GetSettings().forEach((word, definition) => ent.currentNode.nodeValue = ent.currentNode.nodeValue.replace(word, definition); );
-            Object.keys(settings).forEach(word => { ent.currentNode.nodeValue = ent.currentNode.nodeValue.replace(word, settings[word]); });
+            Object.keys(settings).forEach(word => {
+
+                let contents = ent.currentNode.nodeValue.toLowerCase();
+                let wordsToReplace = word.toLowerCase();
+                if (contents.includes(wordsToReplace))
+                    return ent.currentNode.nodeValue = contents.replace(wordsToReplace, settings[word]);
+
+                let [firstName, lastName] = contents.split(" ");
+                let indexOfFirst = contents.search(firstName), indexOfLast = contents.search(lastName);
+                if (indexOfFirst > 0 && indexOfLast > 0)
+                    ent.currentNode.nodeValue = contents.replace(contents.substring(indexOfFirst, indexOfLast + lastName.length), settings[word]);
+            });
 
         }
 
@@ -81,7 +93,7 @@ class SettingsService {
         let popup = document.getElementById(this.cssElements.popup);
 
         if (popup) return popup.style.visibility = popup.style.visibility ? "" : "hidden"; // show / hide
-        
+
         // todo: refactor into a dom generator utility and a user interaction utility
         let settingsFromDb = this.db.GetSettings(),
             keys = Object.keys(settingsFromDb),
