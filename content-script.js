@@ -47,10 +47,8 @@ class SettingsService {
 
                 // todo: remove div parent if possible
                 let isLegit = mutation.addedNodes[0] && mutation.addedNodes[0].firstChild && mutation.addedNodes[0].firstChild.id != this.cssElements.popup;
-                if (isLegit) {
-                    console.log(mutation.addedNodes[0].firstChild);
-                    this.ApplySettings();
-                }
+                if (isLegit) this.ApplySettings();
+
 
             });
 
@@ -67,7 +65,7 @@ class SettingsService {
 
             // future state - option to replace keywords with black bars 
 
-            // this.db.GetSettings().forEach((word, definition) => ent.currentNode.nodeValue = ent.currentNode.nodeValue.replace(word, definition); );
+            //when using map: this.db.GetSettings().forEach((word, definition) => ent.currentNode.nodeValue = ent.currentNode.nodeValue.replace(word, definition); );
             Object.keys(settings).forEach(word => {
 
                 let contents = ent.currentNode.nodeValue.toLowerCase();
@@ -75,10 +73,11 @@ class SettingsService {
                 if (contents.includes(wordsToReplace))
                     return ent.currentNode.nodeValue = contents.replace(wordsToReplace, settings[word]);
 
-                let [firstName, lastName] = contents.split(" ");
-                let indexOfFirst = contents.search(firstName), indexOfLast = contents.search(lastName);
-                if (indexOfFirst > 0 && indexOfLast > 0)
-                    return ent.currentNode.nodeValue = contents.replace(contents.substring(indexOfFirst, indexOfLast + lastName.length), settings[word]);
+                // todo: research regex solution
+                // let [firstName, lastName] = contents.split(" ");
+                // let indexOfFirst = contents.search(firstName), indexOfLast = contents.search(lastName);
+                // if (indexOfFirst > 0 && indexOfLast > 0)
+                //     return ent.currentNode.nodeValue = contents.replace(contents.substring(indexOfFirst, indexOfLast + lastName.length), settings[word]);
             });
 
         }
@@ -275,7 +274,7 @@ class UserInterface {
 }
 
 class UserExperience {
-    
+
     constructor() {
 
     }

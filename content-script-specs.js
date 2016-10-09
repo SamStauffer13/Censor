@@ -1,4 +1,5 @@
-// todo, use package.json to pull in jasmine instead of c/p'd files - reason is, we'll be pulling in babel and web pack via this method anyways, no reason to be inconsistent
+// todo: use package.json to pull in jasmine instead of c/p'd files - reason is, we'll be pulling in babel and web pack via this method anyways, no reason to be inconsistent
+// todo: test fail randomly due to order of execution, impliment async assertions
 
 describe("Censor will begin replace content as soon as the page loads, ", function () {
 
@@ -66,12 +67,26 @@ describe("Censor will begin replace content as soon as the page loads, ", functi
     let expected = "A Mad Scientist";
     describe(`By default, Censor will replace Donald Trump with ${expected}`, () => {
 
+        integrationsTest("Donald Trump", expected);
         integrationsTest("donald trump", expected);
         integrationsTest("DoNalD TruMp", expected);
         integrationsTest("Donald Trump's", expected + "'s");
         integrationsTest("Mr. Donald Trump", expected, true);
         integrationsTest("Donald J. Trump", expected, true);
         integrationsTest("Donald - China Invented Climate Change - Trump", expected, true);
+    });
+
+    let expected2 = "A Six Foot Tall Giant Robot";
+    describe(`By default, Censor will replace Hillary Clinton with ${expected}`, () => {
+
+        integrationsTest("Hillary Clinton", expected2);
+        integrationsTest("hillary clinton", expected2);
+        integrationsTest("hiLlAry cLinTon", expected2);
+        integrationsTest("Hillary Clinton's", expected2 + "'s");
+        integrationsTest("Mrs. Clinton", expected2, true);
+        integrationsTest("Hillary D. Clinton", expected2, true);
+        integrationsTest("Hillary - What's A Felony - Clinton", expected2, true);
+        
     });
 });
 
