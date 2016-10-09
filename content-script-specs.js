@@ -65,19 +65,19 @@ describe("Censor will begin replace content as soon as the page loads, ", functi
     }
 
     let expected = "A Mad Scientist";
-    describe(`By default, Censor will replace Donald Trump with ${expected}`, () => {
+    describe(`By default, Censor will replace variations of Donald Trump with ${expected}`, () => {
 
         integrationsTest("Donald Trump", expected);
         integrationsTest("donald trump", expected);
         integrationsTest("DoNalD TruMp", expected);
         integrationsTest("Donald Trump's", expected + "'s");
-        integrationsTest("Mr. Donald Trump", expected, true);
+        integrationsTest("Mr. Trump", expected, true);
         integrationsTest("Donald J. Trump", expected, true);
         integrationsTest("Donald - China Invented Climate Change - Trump", expected, true);
     });
 
     let expected2 = "A Six Foot Tall Giant Robot";
-    describe(`By default, Censor will replace Hillary Clinton with ${expected}`, () => {
+    describe(`By default, Censor will replace variations of Hillary Clinton with ${expected}`, () => {
 
         integrationsTest("Hillary Clinton", expected2);
         integrationsTest("hillary clinton", expected2);
