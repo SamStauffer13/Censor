@@ -47,7 +47,10 @@ class SettingsService {
 
                 // todo: remove div parent if possible
                 let isLegit = mutation.addedNodes[0] && mutation.addedNodes[0].firstChild && mutation.addedNodes[0].firstChild.id != this.cssElements.popup;
-                if (isLegit) this.ApplySettings();
+                if (isLegit) {
+                    console.log(mutation.addedNodes[0].firstChild);
+                    this.ApplySettings();
+                }
 
             });
 
@@ -75,7 +78,7 @@ class SettingsService {
                 let [firstName, lastName] = contents.split(" ");
                 let indexOfFirst = contents.search(firstName), indexOfLast = contents.search(lastName);
                 if (indexOfFirst > 0 && indexOfLast > 0)
-                    ent.currentNode.nodeValue = contents.replace(contents.substring(indexOfFirst, indexOfLast + lastName.length), settings[word]);
+                    return ent.currentNode.nodeValue = contents.replace(contents.substring(indexOfFirst, indexOfLast + lastName.length), settings[word]);
             });
 
         }
@@ -261,6 +264,22 @@ class SettingsService {
         let popup = document.getElementById(this.cssElements.popup);
         popup.style.visibility = "hidden"; // hide
     }
+}
+
+class UserInterface {
+
+    constructor() {
+
+    }
+
+}
+
+class UserExperience {
+    
+    constructor() {
+
+    }
+
 }
 
 // todo: have this callout to an API so data can persist accross clients

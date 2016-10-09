@@ -1,12 +1,11 @@
 // todo, use package.json to pull in jasmine instead of c/p'd files - reason is, we'll be pulling in babel and web pack via this method anyways, no reason to be inconsistent
 
-describe("Censor will begin replace words as soon as the page loads, ", function () {
+describe("Censor will begin replace content as soon as the page loads, ", function () {
 
-    it("and will continue to replace words after the page loads", function (done) {
+    it("and will continue to replace content after the page loads", function (done) {
 
-        // uses a mutation observer https://goo.gl/iBc25q
+        pending(); // uses a mutation observer https://goo.gl/iBc25q
 
-        // arrange (copied from above)
         let word = 'fire ants';
         let definition = 'spicy boys';
 
@@ -39,84 +38,44 @@ describe("Censor will begin replace words as soon as the page loads, ", function
         expect(true).toEqual(true);
     });
 
-    describe("By default, Censor will ...", () => {
+    let integrationsTest = (variation, expected, markAsPending) => {
 
+        it(`Censor will replace ${variation} with ${expected}`, function () {
 
-    });
-    
-    let integrationsTest = (wordsToTest) => {
-
-        it("and the plugin will replace any word on a web page with a word defined in its settings", function () {
+            if (markAsPending) pending();
 
             // arrange
-            let word = 'fire ants';
-            let definition = 'spicy boys'; // support the cause: https://goo.gl/6Rl20I
-
             let div = document.createElement("div");
             let span = document.createElement("span");
 
-            span.innerHTML = `bla bla bla ${word} bla bla bla`;
+            span.innerHTML = `bla bla bla ${variation} bla bla bla`;
 
             div.appendChild(span);
             document.body.appendChild(div);
 
-            let fakeDataAccess = new SettingsDataAccess();
-            fakeDataAccess.GetSettings = () => { return { [word]: definition }; }
-
             // act
-            let plugin = new SettingsService(fakeDataAccess);
+            let plugin = new SettingsService(new SettingsDataAccess());
 
             // assert
-            expect(span.innerHTML).toEqual(`bla bla bla ${definition} bla bla bla`);
+            expect(span.innerHTML).toEqual(`bla bla bla ${expected} bla bla bla`);
 
             div.remove();
         });
-        
     }
 
-    it("the plugin will ignore capitolization and plurlization");
+    let expected = "A Mad Scientist";
+    describe(`By default, Censor will replace Donald Trump with ${expected}`, () => {
 
-    it("the plugin will replace words regardless of prefixs like Mr. and Mrs.", function () {
-
-        pending();
-
-        // arrange
-        let word = 'fire ants';
-        let definition = 'spicy boys'; // support the cause: https://goo.gl/6Rl20I
-
-        let div = document.createElement("div");
-        let span = document.createElement("span");
-
-        span.innerHTML = `bla bla bla ${word} bla bla bla`;
-
-        div.appendChild(span);
-        document.body.appendChild(div);
-
-        let fakeDataAccess = new SettingsDataAccess();
-        fakeDataAccess.GetSettings = () => { return { [word]: definition }; }
-
-        // act
-        let plugin = new SettingsService(fakeDataAccess);
-
-        // assert
-        expect(span.innerHTML).toEqual(`bla bla bla ${definition} bla bla bla`);
-
-        div.remove();
-
-    });
-
-    it("the plugin will replace words regardless of english determiners like The and A");
-
-    it("the plugin will not replace words on the user interface");
-
-    it("the plugin will replace words regardless of internal descriptives", function () {
-        pending(); // take the first word and the content after it, if the content after it contains the second word, replace the whole string...
+        integrationsTest("donald trump", expected);
+        integrationsTest("DoNalD TruMp", expected);
+        integrationsTest("Donald Trump's", expected + "'s");
+        integrationsTest("Mr. Donald Trump", expected, true);
+        integrationsTest("Donald J. Trump", expected, true);
+        integrationsTest("Donald - China Invented Climate Change - Trump", expected, true);
     });
 });
 
-describe("When displaying user settings,", function () {
-
-    it("clicking on the browser icon will open the interface", function () {
+it("clicking the Censor icon will open the interface", function () {
         // arrange            
         let plugin = new SettingsService(new SettingsDataAccess());
 
@@ -132,14 +91,10 @@ describe("When displaying user settings,", function () {
             userInterface.remove();
 
         }
-        else {
-
-            fail("user interface does not exist");
-
-        }
+        else fail("user interface does not exist");
     });
 
-    it("clicking on the browser icon again will hide the interface", function () {
+    it("clicking the Censor icon a second time will hide the interface", function () {
         // arrange            
         let plugin = new SettingsService(new SettingsDataAccess());
 
@@ -155,21 +110,11 @@ describe("When displaying user settings,", function () {
             userInterface.remove();
 
         }
-        else {
-
-            fail("user interface does not exist");
-
-        }
+        else fail("user interface does not exist");
     });
 
-    it("clicking on a user setting will populate the settings form");
-
-    it("interface should give adequate props to Marat for supplying the attack helicopter icon");
-});
-
-describe("When saving user settings,", function () {
-
-});
+it("The interface should give adequate props to Marat @ The Noun Project for supplying the Attack Helicopter icon");
+it("The interface should give adequate props to Luke Lisis @ LisiDesign.com for supplying the Summit font");
 
 describe("Developer documentation for the settings data access class", function () {
 
