@@ -2,9 +2,8 @@
   "name": "censor",
   "version": "1.0.0",
   "scripts": {
-    "runSpecs" :  "opener ./test/runner.html",
-    "compile": "babel src -d lib",
-    "prepublish": "npm run compile"
+    "onStart" : "opener spec-runner.html livereload ./src",
+    "onSave": "babel src -d lib"
   },
   "dependencies" :{
 
