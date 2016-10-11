@@ -1,6 +1,7 @@
 // mission critical
 // todo: improve replacement algorithm
 // todo: hook up delete functionality
+
 // enhancements
 // todo: get printer function working
 // todo: buttons only show on change, use display:none instead of "visibility"
@@ -8,6 +9,8 @@
 // todo: use place holder text on inputs instead of text values...
 // todo: transpile and minify js, point manifest at transpiled files 
 // todo: specify browser action function in mainfest for keyboard shortcuts : https://developer.chrome.com/extensions/commands
+// todo: get opener, livereload, and babel working and watching...
+// todo: enable/disable the app on icon click, menu is openable via icon in lower corner (invisible until hovered over);
 
 'use strict';
 

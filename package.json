@@ -1,0 +1,21 @@
+{
+  "name": "censor",
+  "version": "1.0.0",
+  "scripts": {
+    "runSpecs" :  "opener ./test/runner.html",
+    "compile": "babel src -d lib",
+    "prepublish": "npm run compile"
+  },
+  "dependencies" :{
+
+  },
+  "devDependencies": {
+    "babel-cli": "^6.16.0",
+    "babel-preset-es2015": "^6.16.0",
+    "opener": "*",
+    "livereload" : "*"
+  },
+    "babel": {
+      "presets": ["es2015"]
+  }
+}

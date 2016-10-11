@@ -19,7 +19,10 @@
     <h3 id="Preview-User-Interface"> Click Here To Preview User Interface </h3>
     <script> 
         let plugin = new SettingsService(new SettingsDataAccess());
+        
         document.getElementById("Preview-User-Interface").onclick = () => plugin.DisplaySettings();
+
+        document.write('<script src="http://' + (location.host || 'localhost').split(':')[0] + ':35729/livereload.js?snipver=1"></' + 'script>')
     </script>
 
 </body>
