@@ -2,7 +2,7 @@
     "manifest_version": 2,
     "name": "Censor",
     "description": "Censors Content",
-    "version": "0.0.0.1",
+    "version": "0.0.0.3",
     "browser_action": {
         "default_icon": "icon-small.png",
         "default_title": "Censor"

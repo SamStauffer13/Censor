@@ -72,8 +72,8 @@ describe("Censor will begin replace content as soon as the page loads, ", functi
         integrationsTest("DoNalD TruMp", expected);
         integrationsTest("Donald Trump's", expected + "'s");
         integrationsTest("Mr. Trump", expected, true);
-        integrationsTest("Donald J. Trump", expected, true);
-        integrationsTest("Donald - China Invented Climate Change - Trump", expected, true);
+        integrationsTest("Donald J. Trump", expected);
+        integrationsTest("Donald - China Invented Climate Change - Trump", expected);
     });
 
     let expected2 = "A Six Foot Tall Giant Robot";
@@ -84,8 +84,8 @@ describe("Censor will begin replace content as soon as the page loads, ", functi
         integrationsTest("hiLlAry cLinTon", expected2);
         integrationsTest("Hillary Clinton's", expected2 + "'s");
         integrationsTest("Mrs. Clinton", expected2, true);
-        integrationsTest("Hillary D. Clinton", expected2, true);
-        integrationsTest("Hillary - What's A Felony - Clinton", expected2, true);
+        integrationsTest("Hillary D. Clinton", expected2);
+        integrationsTest("Hillary - What's A Felony - Clinton", expected2);
         
     });
 });

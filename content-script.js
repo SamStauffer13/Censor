@@ -57,14 +57,12 @@ class SettingsService {
 
     ApplySettings(domToParse = document.body) {
 
-        let start = performance.now();
-
         let settings = this.db.GetSettings(), ent = document.createTreeWalker(domToParse, NodeFilter.SHOW_TEXT);
 
         while (ent.nextNode()) {
 
-            // future state - option to replace keywords with black bars 
-
+            // future state - option to replace keywords with black bars or remove them all together
+            console.log("node");
             //when using map: this.db.GetSettings().forEach((word, definition) => ent.currentNode.nodeValue = ent.currentNode.nodeValue.replace(word, definition); );
             Object.keys(settings).forEach(word => {
 
@@ -74,15 +72,16 @@ class SettingsService {
                     return ent.currentNode.nodeValue = contents.replace(wordsToReplace, settings[word]);
 
                 // todo: research regex solution
-                // let [firstName, lastName] = contents.split(" ");
-                // let indexOfFirst = contents.search(firstName), indexOfLast = contents.search(lastName);
-                // if (indexOfFirst > 0 && indexOfLast > 0)
-                //     return ent.currentNode.nodeValue = contents.replace(contents.substring(indexOfFirst, indexOfLast + lastName.length), settings[word]);
+                let [firstName, lastName] = wordsToReplace.split(" ");
+
+                if(!lastName) return;
+
+                let indexOfFirst = contents.search(firstName), indexOfLast = contents.search(lastName);
+                if (indexOfFirst > 0 && indexOfLast > 0)
+                    return ent.currentNode.nodeValue = contents.replace(contents.substring(indexOfFirst, indexOfLast + lastName.length), settings[word]);
             });
 
         }
-
-        // console.info(`plugin took ${performance.now() - start} ms on execution #${this.timesInvoked++}`);
     }
 
     PrintOneLetterAtATime(message, cssElement) {
@@ -131,7 +130,7 @@ class SettingsService {
 
                <button id=${this.cssElements.updateButton} class="${this.cssElements.updateButton}"> Save </button>
 
-               <button id=${this.cssElements.deleteButton} class="${this.cssElements.deleteButton}"> Delete </button>
+               <button id=${this.cssElements.deleteButton} class="${this.cssElements.deleteButton}"> Wipe Everyting </button>
 
             </div>
 
@@ -229,6 +228,7 @@ class SettingsService {
 
     DeleteSetting() {
 
+        this.db.UpdateSettings(null);
     }
 
     UpdateSetting() {
@@ -289,9 +289,15 @@ class SettingsDataAccess {
         this.notesKey = "8B7C91137E2AFE924FBFBB3E6FE71";
 
         // todo refactor this to use a map instead of key value object
-        this.defaultSettings = { "Donald Trump": "A Mad Scientist", "Hillary Clinton": "A Six Foot Tall Giant Robot" };
+        this.defaultSettings = { 
+
+            "Donald Trump": "A Mad Scientist",
+            "Hillary Clinton": "A Six Foot Tall Giant Robot"
+                  
+        };
+
         // this.defaultSettings = new Map().set("Donald Trump", "A Mad Scientist").set("Hillary Clinton", "A Six Foot Tall Giant Robot");
-        this.defaultNotes = "Thanks to Marat @ Thenounproject.com for creating the icons and Luke Lisi @ lisidesign.com for creating the font";
+        this.defaultNotes = "Version 0.0.0.1 only supports default settings. Shoutout to Marat @ Thenounproject.com for creating the icons and Luke Lisi @ lisidesign.com for creating this font";
     }
 
     GetSettings() {
