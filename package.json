@@ -1,9 +1,9 @@
 {
   "name": "censor",
-  "version": "1.0.0",
+  "version": "3.0.0",
   "scripts": {
-    "onStart" : "opener spec-runner.html livereload ./src",
-    "onSave": "babel src -d lib"
+    "start" : "npm run build && opener spec-runner.html && livereload src",
+    "build": "babel src --watch --out-dir lib --ignore specs.js"
   },
   "dependencies" :{
 

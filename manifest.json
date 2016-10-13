@@ -4,12 +4,12 @@
     "description": "Censors Content",
     "version": "0.0.0.3",
     "browser_action": {
-        "default_icon": "icon-small.png",
+        "default_icon": "resources/icon-small.png",
         "default_title": "Censor"
     },
     "background": {
         "scripts": [
-            "background.js"
+            "src/background.js"
         ]
     },
     "content_scripts": [
@@ -19,17 +19,17 @@
                 "https://*/*"
             ],
             "js": [
-                "content-script.js",
-                "content-script-init.js"
+                "src/content-script.js",
+                "src/content-script-init.js"
             ],
             "css": [
-                "content-script.css"
+                "src/content-script.css"
             ]
         }
     ],
     "web_accessible_resources": [
-        "icon-large.png",
-        "SummitLight-Display.ttf"
+        "resources/icon-large.png",
+        "resources/SummitLight-Display.ttf"
     ],
     "permissions": [
         "tabs",

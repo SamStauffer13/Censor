@@ -129,6 +129,7 @@ it("clicking the Censor icon will open the interface", function () {
     });
 
 it("The interface should give adequate props to Marat @ The Noun Project for supplying the Attack Helicopter icon");
+
 it("The interface should give adequate props to Luke Lisis @ LisiDesign.com for supplying the Summit font");
 
 describe("Developer documentation for the settings data access class", function () {

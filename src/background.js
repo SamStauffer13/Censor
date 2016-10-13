@@ -4,4 +4,4 @@ chrome.browserAction.onClicked.addListener(function () {
         chrome.tabs.sendMessage(tabs[0].id, { displaySettings: "true" }, function (response) {
         });
     });
-});
+}); 

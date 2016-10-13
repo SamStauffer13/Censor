@@ -50,15 +50,13 @@ class SettingsService {
 
                 // todo: remove div parent if possible
                 let isLegit = mutation.addedNodes[0] && mutation.addedNodes[0].firstChild && mutation.addedNodes[0].firstChild.id != this.cssElements.popup;
-                if (isLegit) this.ApplySettings();
-
-
+                if (isLegit) this.ApplySettings(); 
             });
 
         }).observe(document.body, { childList: true });
     }
 
-    ApplySettings(domToParse = document.body) {
+    ApplySettings(domToParse = document.body) {        
 
         let settings = this.db.GetSettings(), ent = document.createTreeWalker(domToParse, NodeFilter.SHOW_TEXT);
 
@@ -72,7 +70,7 @@ class SettingsService {
                 let contents = ent.currentNode.nodeValue.toLowerCase();
                 let wordsToReplace = word.toLowerCase();
                 if (contents.includes(wordsToReplace))
-                    return ent.currentNode.nodeValue = contents.replace(wordsToReplace, settings[word]);
+                     return ent.currentNode.nodeValue = contents.replace(wordsToReplace, settings[word]);
 
                 // todo: research regex solution
                 let [firstName, lastName] = wordsToReplace.split(" ");
@@ -80,7 +78,7 @@ class SettingsService {
                 if(!lastName) return;
 
                 let indexOfFirst = contents.search(firstName), indexOfLast = contents.search(lastName);
-                if (indexOfFirst > 0 && indexOfLast > 0)
+               if (indexOfFirst > 0 && indexOfLast > 0)
                     return ent.currentNode.nodeValue = contents.replace(contents.substring(indexOfFirst, indexOfLast + lastName.length), settings[word]);
             });
 
@@ -138,7 +136,7 @@ class SettingsService {
             </div>
 
             <div>
-                <img class="${this.cssElements.imageLarge}" src="${chrome.extension ? chrome.extension.getURL("icon-large.png") : "icon-large.png"}"/>
+                <img class="${this.cssElements.imageLarge}" src="${chrome.extension ? chrome.extension.getURL("resources/icon-large.png") : "resources/icon-large.png"}"/>
 
                 <button id=${this.cssElements.saveButton} class="${this.cssElements.saveButton}"> Exit </button>
             </div>
