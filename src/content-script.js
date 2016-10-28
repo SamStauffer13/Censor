@@ -278,29 +278,26 @@ class Censor {
 class UserInterface {
     constructor() {
         this.container = document.createElement("div");
-        this.container.innerHTML = `<div class="censor-container"></div>`;
+        this.container.innerHTML = `<div class="censor-container"><input type="text"/></div>`;
         document.body.appendChild(this.container);
     }
 }
 
 class UserExperience {
-
     constructor() {
+
         this.UI = new UserInterface();
+        this.WelcomeMessage = `Hello Creature, What Is Your Name?`;
     }
 
     DisplayUserSettings() {
-
-        this.PrintOneLetterAtATime(`What's Your Name?`, this.UI.input);
-
+        this.PrintOneLetterAtATime(this.WelcomeMessage, this.UI.container);
     }
 
     PrintOneLetterAtATime(message, cssElement, charPosition = 0) {
-
         if (charPosition >= message.length) return;
         cssElement.innerHTML += message[charPosition++];
         setTimeout(() => { this.PrintOneLetterAtATime(message, cssElement, charPosition); }, 150);
-
     }
 }
 

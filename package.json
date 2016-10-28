@@ -4,7 +4,7 @@
   "scripts": {
     "start": "opener spec-runner.html && livereload src",
     "build": "babel src --watch --out-dir lib --ignore specs.js",
-    "lint": "eslint src/background.js"
+    "lint": "eslint src/"
   },
   "dependencies": {},
   "devDependencies": {
