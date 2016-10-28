@@ -50,45 +50,48 @@ class SettingsService {
 
                 // todo: remove div parent if possible
                 let isLegit = mutation.addedNodes[0] && mutation.addedNodes[0].firstChild && mutation.addedNodes[0].firstChild.id != this.cssElements.popup;
-                if (isLegit) this.ApplySettings(); 
+                if (isLegit) this.ApplySettings();
             });
 
         }).observe(document.body, { childList: true });
     }
 
-    ApplySettings(domToParse = document.body) {        
+    ApplySettings(domToParse = document.body) {
 
         let settings = this.db.GetSettings(), ent = document.createTreeWalker(domToParse, NodeFilter.SHOW_TEXT);
 
         while (ent.nextNode()) {
 
             // future state - option to replace keywords with black bars or remove them all together
-            
+
             // when using map: this.db.GetSettings().forEach((word, definition) => ent.currentNode.nodeValue = ent.currentNode.nodeValue.replace(word, definition); );
             Object.keys(settings).forEach(word => {
 
                 let contents = ent.currentNode.nodeValue.toLowerCase();
                 let wordsToReplace = word.toLowerCase();
                 if (contents.includes(wordsToReplace))
-                     return ent.currentNode.nodeValue = contents.replace(wordsToReplace, settings[word]);
+                    return ent.currentNode.nodeValue = contents.replace(wordsToReplace, settings[word]);
 
                 // todo: research regex solution
                 let [firstName, lastName] = wordsToReplace.split(" ");
 
-                if(!lastName) return;
+                if (!lastName) return;
 
                 let indexOfFirst = contents.search(firstName), indexOfLast = contents.search(lastName);
-               if (indexOfFirst > 0 && indexOfLast > 0)
+                if (indexOfFirst > 0 && indexOfLast > 0)
                     return ent.currentNode.nodeValue = contents.replace(contents.substring(indexOfFirst, indexOfLast + lastName.length), settings[word]);
             });
 
         }
     }
 
-    // PrintOneLetterAtATime(message, cssElement) {
-    //     // https://stackoverflow.com/questions/7264974/show-text-letter-by-letter
-    //     return message;
-    // }
+    PrintOneLetterAtATime(chooChoo = 0, message, cssElement) {
+        if (chooChoo >= message.length) return;
+
+        cssElement.innerHTML += message[chooChoo++];
+
+        setTimeout(() => { PrintOneLetterAtATime(chooChoo, message, cssElement); }, 100);
+    }
 
     DisplaySettings() {
 
@@ -266,25 +269,39 @@ class SettingsService {
     }
 }
 
-class UserInterface 
-{
-    constructor() 
-    {
-
+class Censor {
+    constructor() {
+        this.UX = new UserExperience();
     }
+}
 
-    Hide()
-    {
-
+class UserInterface {
+    constructor() {
+        this.container = document.createElement("div");
+        this.container.innerHTML = `<div class="censor-container"></div>`;
+        document.body.appendChild(this.container);
     }
 }
 
 class UserExperience {
 
     constructor() {
+        this.UI = new UserInterface();
+    }
+
+    DisplayUserSettings() {
+
+        this.PrintOneLetterAtATime(`What's Your Name?`, this.UI.input);
 
     }
 
+    PrintOneLetterAtATime(message, cssElement, charPosition = 0) {
+
+        if (charPosition >= message.length) return;
+        cssElement.innerHTML += message[charPosition++];
+        setTimeout(() => { this.PrintOneLetterAtATime(message, cssElement, charPosition); }, 150);
+
+    }
 }
 
 // todo: have this callout to an API so data can persist accross clients
@@ -295,11 +312,11 @@ class SettingsDataAccess {
         this.notesKey = "8B7C91137E2AFE924FBFBB3E6FE71";
 
         // todo refactor this to use a map instead of key value object
-        this.defaultSettings = { 
+        this.defaultSettings = {
 
             "Donald Trump": "A Mad Scientist",
             "Hillary Clinton": "A Six Foot Tall Giant Robot"
-                  
+
         };
 
         // this.defaultSettings = new Map().set("Donald Trump", "A Mad Scientist").set("Hillary Clinton", "A Six Foot Tall Giant Robot");

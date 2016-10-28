@@ -86,47 +86,47 @@ describe("Censor will begin replace content as soon as the page loads, ", functi
         integrationsTest("Mrs. Clinton", expected2, true);
         integrationsTest("Hillary D. Clinton", expected2);
         integrationsTest("Hillary - What's A Felony - Clinton", expected2);
-        
+
     });
 });
 
 it("clicking the Censor icon will open the interface", function () {
-        // arrange            
-        let plugin = new SettingsService(new SettingsDataAccess());
+    // arrange            
+    let plugin = new SettingsService(new SettingsDataAccess());
 
-        // act
-        plugin.DisplaySettings();
+    // act
+    plugin.DisplaySettings();
 
-        // assert        
-        let userInterface = document.getElementById(plugin.cssElements.popup);
+    // assert        
+    let userInterface = document.getElementById(plugin.cssElements.popup);
 
-        if (userInterface) {
+    if (userInterface) {
 
-            expect(userInterface.style.visibility).toEqual("");
-            userInterface.remove();
+        expect(userInterface.style.visibility).toEqual("");
+        userInterface.remove();
 
-        }
-        else fail("user interface does not exist");
-    });
+    }
+    else fail("user interface does not exist");
+});
 
-    it("clicking the Censor icon a second time will hide the interface", function () {
-        // arrange            
-        let plugin = new SettingsService(new SettingsDataAccess());
+it("clicking the Censor icon a second time will hide the interface", function () {
+    // arrange            
+    let plugin = new SettingsService(new SettingsDataAccess());
 
-        // act
-        plugin.DisplaySettings();
-        plugin.DisplaySettings();
+    // act
+    plugin.DisplaySettings();
+    plugin.DisplaySettings();
 
-        // assert        
-        let userInterface = document.getElementById(plugin.cssElements.popup);
-        if (userInterface) {
+    // assert        
+    let userInterface = document.getElementById(plugin.cssElements.popup);
+    if (userInterface) {
 
-            expect(userInterface.style.visibility).toEqual("hidden");
-            userInterface.remove();
+        expect(userInterface.style.visibility).toEqual("hidden");
+        userInterface.remove();
 
-        }
-        else fail("user interface does not exist");
-    });
+    }
+    else fail("user interface does not exist");
+});
 
 it("The interface should give adequate props to Marat @ The Noun Project for supplying the Attack Helicopter icon");
 
