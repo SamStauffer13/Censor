@@ -63,8 +63,8 @@ class SettingsService {
         while (ent.nextNode()) {
 
             // future state - option to replace keywords with black bars or remove them all together
-            console.log("node");
-            //when using map: this.db.GetSettings().forEach((word, definition) => ent.currentNode.nodeValue = ent.currentNode.nodeValue.replace(word, definition); );
+            
+            // when using map: this.db.GetSettings().forEach((word, definition) => ent.currentNode.nodeValue = ent.currentNode.nodeValue.replace(word, definition); );
             Object.keys(settings).forEach(word => {
 
                 let contents = ent.currentNode.nodeValue.toLowerCase();
@@ -85,10 +85,10 @@ class SettingsService {
         }
     }
 
-    PrintOneLetterAtATime(message, cssElement) {
-        // https://stackoverflow.com/questions/7264974/show-text-letter-by-letter
-        return message;
-    }
+    // PrintOneLetterAtATime(message, cssElement) {
+    //     // https://stackoverflow.com/questions/7264974/show-text-letter-by-letter
+    //     return message;
+    // }
 
     DisplaySettings() {
 
@@ -266,12 +266,17 @@ class SettingsService {
     }
 }
 
-class UserInterface {
-
-    constructor() {
+class UserInterface 
+{
+    constructor() 
+    {
 
     }
 
+    Hide()
+    {
+
+    }
 }
 
 class UserExperience {
