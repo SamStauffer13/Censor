@@ -130,8 +130,13 @@
 }
 
 .censor-icon-large{
+    z-index:1000;
     max-width: 5%;
     opacity:0.2;
     height: auto;
     float: right;
+}
+
+.censor-icon-large:hover{
+    opacity:1;
 }

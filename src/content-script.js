@@ -1,26 +1,18 @@
 // todo: improve replacement algorithm
-// todo: get printer function working
-// todo: buttons only show on change, use display:none instead of "visibility"
 // todo: target element then ID instead of generic class for better css specificity : https://developer.mozilla.org/en-US/docs/Web/CSS/Specificity
-// todo: use place holder text on inputs instead of text values...
-// todo: transpile and minify js, point manifest at transpiled files 
+// todo: convert to .ts file and minify transpiled js, point manifest at transpiled files 
 // todo: specify browser action function in mainfest for keyboard shortcuts : https://developer.chrome.com/extensions/commands
-// todo: get opener, livereload, and babel working and watching...
-// todo: enable/disable the app on icon click, menu is openable via icon in lower corner (invisible until hovered over);
+// todo: get opener and livereload working for faster development...
 
-'use strict';
+'use strict'
+
 class Censor {
-    constructor() {
-        this.censor = new CensorController();
-    }
-}
-
-// this class is responsible for interacting with the user
-class CensorController {
 
     constructor() {
 
         this.UI = new UserInterface();
+
+        this.CensorService = new CensorService();
 
         if (chrome.runtime.onMessage) chrome.runtime.onMessage.addListener((request) => this.EnableCensor(request.enableCensor));
     }
@@ -29,16 +21,22 @@ class CensorController {
 
         if (enableCensor === true) {
 
-            this.UI.ShowMenu();
-        }
-        else {
+            this.UI.ShowIcon();
 
-            this.UI.HideMenu();
+            this.CensorService.CensorDom();
+
+            this.CensorService.ListenForDomChanges(true);
+        }
+        else if (enableCensor === false) {
+
+            this.UI.HideIcon();
+
+            this.CensorService.ListenForDomChanges(false);
         }
     }
 }
 
-// this class is responsible for rendering the user interface
+
 // todo consider breaking this into an Icon class and a Menu class
 class UserInterface {
 
@@ -46,7 +44,7 @@ class UserInterface {
 
     ShowIcon() {
 
-        document.body.innerHTML += `<img class="censor-icon-large" src="${chrome.extension ? chrome.extension.getURL("resources/icon-large.png") : "resources/icon-large.png"}"/>`;
+        // document.body.innerHTML += `<img class="censor-icon-large" src="${chrome.extension ? chrome.extension.getURL("resources/icon-large.png") : "resources/icon-large.png"}"/>`;
     }
 
     HideIcon() {
@@ -61,7 +59,7 @@ class UserInterface {
 
         document.body.appendChild(container);
 
-        this.PrintOneLetterAtATime("Hello World!", container)
+        this.PrintOneLetterAtATime("Hello Creature... What is your name?", container)
     }
 
     HideMenu() {
@@ -74,6 +72,7 @@ class UserInterface {
 
         htmlElement.innerHTML += message[charPosition++];
 
+        // recursion (0_0)
         setTimeout(() => { this.PrintOneLetterAtATime(message, htmlElement, charPosition); }, 150);
     }
 }
@@ -82,56 +81,105 @@ class CensorService {
 
     constructor() {
 
-        this.triggerWarning = "[Politics]";
+        this.triggerWarning = "[politics]";
+
+        let debouce = null;
+
+        this.teenageMutant = new MutationObserver(mutations => {
+
+            // improve this watching algorithm
+            let observer = () => mutations.forEach(mutation => this.CensorDom());
+
+            clearTimeout(debouce);
+
+            debouce = setTimeout(() => observer(), 1000);
+        });
     }
 
     ListenForDomChanges(enabled = true) {
 
-        // new MutationObserver(mutations => {
+        if (enabled === true) {
 
-        //     // todo: limit to run only once a second
-        //     mutations.forEach(mutation => {
+            this.teenageMutant.observe(document.body, { childList: true });
+        }
+        else if (enabled === false) {
 
-        //         // todo: remove div parent if possible
-        //         let isLegit = mutation.addedNodes[0] && mutation.addedNodes[0].firstChild && mutation.addedNodes[0].firstChild.id != this.cssElements.popup;
-        //         if (isLegit) this.ApplySettings();
-        //     });
-
-        // }).observe(document.body, { childList: true });
-
+            this.teenageMutant.disconnect();
+        }
     }
 
     CensorDom(domToParse = document.body) {
 
         let ent = document.createTreeWalker(domToParse, NodeFilter.SHOW_TEXT);
 
+        let facebookOffenders = [];
+
         while (ent.nextNode()) {
 
-            let contents = ent.currentNode.nodeValue.toLowerCase();
+            let content = ent.currentNode.nodeValue.toLowerCase().trim();
 
-            if (contents.contains(this.triggerWarning)) {
+            if (content.includes(this.triggerWarning)) {
 
-                ent.currentNode.nodeValue = this.GetKittenGif();
+                if (window.location.hostname == 'www.facebook.com' && ent.currentNode) {
+
+                    //let post = this.GetOffendingFacebookPost(ent.currentNode)
+                    let post = ent.currentNode.parentElement;
+                    facebookOffenders.push(post);
+                }
             }
         }
+
+        facebookOffenders.forEach((offender) => offender.innerHTML = this.GetRandomKittenGif());
     }
 
-    GetKittenGif(size = "small") {
+    GetOffendingFacebookPost(offendingNode) {
 
-        var xhttp = new XMLHttpRequest();
+        let currentParent = offendingNode;
 
-        // todo find better api that lets you pass in width/height to exact replace curent photos
-        xhttp.open("GET", `http://thecatapi.com/api/images/get?format=src&type=gif&size=${size}`, false);
+        let magicNumber = 7; // position of wrapper element in facebook's dom
 
-        xhttp.send();
+        let letsCrawlThroughFacebooksDomStructure = 0;
 
-        let src = xhttp.responseText;
+        while (letsCrawlThroughFacebooksDomStructure < magicNumber && currentParent.parentElement != null) {
 
-        return `<img class="" src="${src}"/>`
+            currentParent = currentParent.parentElement;
+
+            // if (currentParent.className.includes('userContentWrapper')) break;
+
+            letsCrawlThroughFacebooksDomStructure++
+        }
+
+        return currentParent;
+    }
+
+    GetRandomKittenGif(size = "large") {
+
+        return `<img src="http://thecatapi.com/api/images/get?format=src&type=gif&size=${size}"/>`
+
+        // todo impliment better API call: https://blog.garstasio.com/you-dont-need-jquery/ajax/#getting
+        // let xmlhttp = new XMLHttpRequest();
+
+        // xmlhttp.onreadystatechange = function () {
+
+        //     if (xmlhttp.readyState === XMLHttpRequest.DONE) {
+
+        //         if (xmlhttp.status === 200) {
+
+        //             parent.innerHTML =  `<img class="" src="${xmlhttp.responseText}"/>`;
+        //         }
+        //         else {
+        //             console.log("server returned status code: ", xmlhttp.status)
+        //         }
+        //     }
+        // };
+
+        // xmlhttp.open("GET", `http://thecatapi.com/api/images/get?format=src&type=gif&size=${size}`, true);
+
+        // xmlhttp.send();        
     }
 }
 
-// obsolete
+// obsolete garbage
 // class SettingsService {
 
 //     constructor(SettingsDataAccess) {
