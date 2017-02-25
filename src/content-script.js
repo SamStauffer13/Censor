@@ -1,5 +1,5 @@
 // todo: improve replacement algorithm
-// todo: target element then ID instead of generic class for better css specificity : https://developer.mozilla.org/en-US/docs/Web/CSS/Specificity
+// todo: target element by  ID instead of generic class for better css specificity : https://developer.mozilla.org/en-US/docs/Web/CSS/Specificity
 // todo: convert to .ts file and minify transpiled js, point manifest at transpiled files 
 // todo: specify browser action function in mainfest for keyboard shortcuts : https://developer.chrome.com/extensions/commands
 // todo: get opener and livereload working for faster development...
@@ -13,6 +13,10 @@ class Censor {
         this.UI = new UserInterface();
 
         this.CensorService = new CensorService();
+        
+        let shouldRunOnPageLoad = true;
+
+        if (shouldRunOnPageLoad) this.EnableCensor(true);
 
         if (chrome.runtime.onMessage) chrome.runtime.onMessage.addListener((request) => this.EnableCensor(request.enableCensor));
     }
@@ -29,51 +33,8 @@ class Censor {
         }
         else if (enableCensor === false) {
 
-            this.UI.HideIcon();
-
             this.CensorService.ListenForDomChanges(false);
         }
-    }
-}
-
-
-// todo consider breaking this into an Icon class and a Menu class
-class UserInterface {
-
-    constructor() { }
-
-    ShowIcon() {
-
-        // document.body.innerHTML += `<img class="censor-icon-large" src="${chrome.extension ? chrome.extension.getURL("resources/icon-large.png") : "resources/icon-large.png"}"/>`;
-    }
-
-    HideIcon() {
-
-    }
-
-    ShowMenu() {
-
-        let container = document.createElement("div");
-
-        container.className = "censor-container";
-
-        document.body.appendChild(container);
-
-        this.PrintOneLetterAtATime("Hello Creature... What is your name?", container)
-    }
-
-    HideMenu() {
-
-    }
-
-    PrintOneLetterAtATime(message, htmlElement, charPosition = 0) {
-
-        if (charPosition >= message.length) return;
-
-        htmlElement.innerHTML += message[charPosition++];
-
-        // recursion (0_0)
-        setTimeout(() => { this.PrintOneLetterAtATime(message, htmlElement, charPosition); }, 150);
     }
 }
 
@@ -87,7 +48,6 @@ class CensorService {
 
         this.teenageMutant = new MutationObserver(mutations => {
 
-            // improve this watching algorithm
             let observer = () => mutations.forEach(mutation => this.CensorDom());
 
             clearTimeout(debouce);
@@ -122,11 +82,14 @@ class CensorService {
 
                 if (window.location.hostname == 'www.facebook.com' && ent.currentNode) {
 
-                    //let post = this.GetOffendingFacebookPost(ent.currentNode)
-                    let post = ent.currentNode.parentElement;
-                    facebookOffenders.push(post);
+                    let post = this.GetOffendingFacebookPost(ent.currentNode)
+
+                    if (post !== null) facebookOffenders.push(post);
                 }
             }
+
+            // if (content.includes('sam stauffer')) ent.currentNode.nodeValue = ent.currentNode.nodeValue.replace('sam stauffer', "test");
+
         }
 
         facebookOffenders.forEach((offender) => offender.innerHTML = this.GetRandomKittenGif());
@@ -134,48 +97,74 @@ class CensorService {
 
     GetOffendingFacebookPost(offendingNode) {
 
-        let currentParent = offendingNode;
+        while ((offendingNode = offendingNode.parentElement) && !offendingNode.classList.contains('userContentWrapper'));
 
-        let magicNumber = 7; // position of wrapper element in facebook's dom
-
-        let letsCrawlThroughFacebooksDomStructure = 0;
-
-        while (letsCrawlThroughFacebooksDomStructure < magicNumber && currentParent.parentElement != null) {
-
-            currentParent = currentParent.parentElement;
-
-            // if (currentParent.className.includes('userContentWrapper')) break;
-
-            letsCrawlThroughFacebooksDomStructure++
-        }
-
-        return currentParent;
+        return offendingNode;
     }
 
-    GetRandomKittenGif(size = "large") {
+    GetRandomKittenGif() {
 
-        return `<img src="http://thecatapi.com/api/images/get?format=src&type=gif&size=${size}"/>`
+        return `<img id="censor-kitty-photo" src="https://thecatapi.com/api/images/get?format=src&type=jpg&size=large&category=boxes"/>`
 
-        // todo impliment better API call: https://blog.garstasio.com/you-dont-need-jquery/ajax/#getting
-        // let xmlhttp = new XMLHttpRequest();
+    }
+}
 
-        // xmlhttp.onreadystatechange = function () {
+class UserInterface {
 
-        //     if (xmlhttp.readyState === XMLHttpRequest.DONE) {
+    constructor() {
 
-        //         if (xmlhttp.status === 200) {
+        this.icon = new CensorIcon();
 
-        //             parent.innerHTML =  `<img class="" src="${xmlhttp.responseText}"/>`;
-        //         }
-        //         else {
-        //             console.log("server returned status code: ", xmlhttp.status)
-        //         }
-        //     }
-        // };
+        this.menu = new CensorSettingsMenu();
+    }
 
-        // xmlhttp.open("GET", `http://thecatapi.com/api/images/get?format=src&type=gif&size=${size}`, true);
+    ShowIcon() {
 
-        // xmlhttp.send();        
+        this.icon.element.onclick = () => this.ShowMenu();
+
+        document.body.appendChild(this.icon.element);
+    }
+
+    HideIcon() {
+
+    }
+
+    ShowMenu() {
+
+        document.body.appendChild(this.menu.element);
+
+        this.PrintOneLetterAtATime("Hello Creature, What is your name?", this.menu.element)
+    }
+
+    HideMenu() {
+
+    }
+
+    PrintOneLetterAtATime(message, htmlElement, charPosition = 0) {
+
+        if (charPosition >= message.length) return;
+
+        htmlElement.innerHTML += message[charPosition++];
+        
+        setTimeout(() => { this.PrintOneLetterAtATime(message, htmlElement, charPosition); }, 120); // recursion (0_0)
+    }
+}
+
+class CensorIcon {
+    constructor() {
+
+        this.element = document.createElement('img');
+        this.element.src = chrome.extension ? chrome.extension.getURL('resources/icon-large.png') : 'resources/icon-large.png';
+        this.element.classList = 'censor-icon-large';
+
+    }
+}
+
+class CensorSettingsMenu {
+    constructor() {
+
+        this.element = document.createElement("div");
+        this.element.className = "censor-container";
     }
 }
 
@@ -448,7 +437,6 @@ class CensorService {
 
 //             "Donald Trump": "A Mad Scientist",
 //             "Hillary Clinton": "A Six Foot Tall Giant Robot",
-//             "Chris Givan" : "BitchTits"
 
 //         };
 
