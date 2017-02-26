@@ -10,26 +10,27 @@ class Censor {
 
     constructor() {
 
-        this.UI = new UserInterface();
-
         this.CensorService = new CensorService();
 
-        this.CensorDB = new CensorDataAccess();
-
-        let shouldRunOnPageLoad = this.CensorDB.IsCensorEnabled();
-
-        this.EnableCensor(shouldRunOnPageLoad);
+        if (this.CensorService.ShouldRunOnPageLoad()) this.EnableCensor(true);
 
         if (chrome.runtime.onMessage) chrome.runtime.onMessage.addListener((request) => this.EnableCensor(request.enableCensor));
     }
 
     EnableCensor(enableCensor) {
 
-        if (enableCensor === true) this.CensorService.CensorDom();
+        if (enableCensor === true) {
+
+            this.CensorService.CensorDom();
+        }
+        else {
+
+            this.CensorService.UnCensorDom();
+        }
 
         this.CensorService.ListenForDomChanges(enableCensor);
 
-        this.CensorDB.UpdateCensorStatus(enableCensor);
+        this.CensorService.UpdateCensorStatus(enableCensor);
     }
 }
 
@@ -37,25 +38,7 @@ class CensorService {
 
     constructor() {
 
-        this.triggerWarnings = ["[politics]"];
-
-        this.debauchery = {
-
-            "trump": "A Mad Scientist",
-            "donald trump": "A Mad Scientist",
-            "donald j. trump": "A Mad Scientist",
-            "black lives matter": "Attack Helicopter Lives Matter",
-            "lgbt": "Attack Helicopters",
-            "anti-muslim": "Anti-Attack-Helicopter",
-            "alt-right": "Anti-Attack-Helicopters",
-            "andrew robertson": "Jizz Pirate",
-            "theodoric raimund legr": "Titts",
-            "andrew r mchugh": "A Six Foot Tall Giant Robot",
-            "david barkley strawhun": "Spicy Taco Farts",
-            "alex meyer": "Wang Lord",
-            "chris givan": "Fister Roboto",
-            "sam stauffer": "ಠ‿↼"
-        }
+        this.CensorDB = new CensorDataAccess();
 
         let deboucer = null;
 
@@ -67,6 +50,18 @@ class CensorService {
 
             deboucer = setTimeout(() => observer(), 1000);
         });
+
+        this.facebookOffenders = [];
+    }
+
+    UpdateCensorStatus(enabled) {
+
+        this.CensorDB.UpdateCensorStatus(enabled);
+    }
+
+    ShouldRunOnPageLoad() {
+
+        return this.CensorDB.IsCensorEnabled();
     }
 
     ListenForDomChanges(enabled = true) {
@@ -85,21 +80,23 @@ class CensorService {
 
         let ent = document.createTreeWalker(domToParse, NodeFilter.SHOW_TEXT);
 
-        let facebookOffenders = [];
-
         while (ent.nextNode()) {
 
             let content = ent.currentNode.nodeValue.toLowerCase().trim();
 
-            this.triggerWarnings.forEach((triggerWarning) => {
+            let triggerWarnings = this.CensorDB.GetTriggerWarnings();
+
+            triggerWarnings.forEach((triggerWarning) => {
 
                 if (content.includes(triggerWarning) && ent.currentNode) {
+
+                    console.log("how many times");
 
                     if (window.location.hostname == 'www.facebook.com') {
 
                         let post = this.GetOffendingFacebookPost(ent.currentNode)
 
-                        if (post !== null) facebookOffenders.push(post);
+                        if (post !== null) this.facebookOffenders.push(post);
                     }
                     else if (ent.currentNode.parentElement) {
 
@@ -108,14 +105,32 @@ class CensorService {
                 }
             });
 
-            Object.keys(this.debauchery).forEach(trigger => {
+            let debauchery = this.CensorDB.GetDebauchery();
 
-                if (content.includes(trigger)) ent.currentNode.nodeValue = content.replace(trigger, this.debauchery[trigger]);
+            Object.keys(debauchery).forEach(trigger => {
+
+                if (content.includes(trigger)) ent.currentNode.nodeValue = content.replace(trigger, debauchery[trigger]);
 
             });
         }
 
-        facebookOffenders.forEach((offender) => offender.innerHTML = this.GetRandomKittenGif());
+        this.facebookOffenders.forEach((offender) => {
+
+            // todo, figure out why there is excessive looping
+            if (offender.firstChild && offender.firstChild.id === 'censor-kitty-photo') return;
+
+            offender.previousContents = offender.innerHTML;
+
+            offender.innerHTML = this.GetRandomKittenGif();
+        });
+    }
+
+    UnCensorDom() {
+
+        this.facebookOffenders.forEach((offender) => {
+
+            offender.innerHTML = offender.previousContents;
+        });
     }
 
     GetOffendingFacebookPost(offendingNode) {
@@ -139,6 +154,28 @@ class CensorDataAccess {
         this.CensorStatusKey = "CensorStatusKey";
     }
 
+    GetTriggerWarnings() {
+
+        // todo 
+        return ["[politics]"];
+    }
+
+    GetDebauchery() {
+
+        // todo 
+        return {
+
+            "trump": "A Mad Scientist",
+            "donald trump": "A Mad Scientist",
+            "donald j. trump": "A Mad Scientist",
+            "black lives matter": "Attack Helicopter Lives Matter",
+            "lgbt": "Attack Helicopters",
+            "anti-muslim": "Anti-Attack-Helicopter",
+            "alt-right": "Anti-Attack-Helicopters",
+            "sam stauffer": "ಠ‿↼"
+        };
+    }
+
     IsCensorEnabled() {
 
         let status = localStorage.getItem(this.CensorStatusKey);
@@ -154,63 +191,63 @@ class CensorDataAccess {
     }
 }
 
-class UserInterface {
+// class UserInterface {
 
-    constructor() {
+//     constructor() {
 
-        this.icon = new CensorIcon();
+//         this.icon = new CensorIcon();
 
-        this.icon.element.onclick = () => this.ShowMenu();
+//         this.icon.element.onclick = () => this.ShowMenu();
 
-        this.menu = new CensorSettingsMenu();
-    }
+//         this.menu = new CensorSettingsMenu();
+//     }
 
-    ShowIcon() {
+//     ShowIcon() {
 
-    }
+//     }
 
-    ShowMenu() {
+//     ShowMenu() {
 
-        document.body.appendChild(this.menu.element);
+//         document.body.appendChild(this.menu.element);
 
-        // this.PrintOneLetterAtATime("", this.menu.element)
-    }
+//         // this.PrintOneLetterAtATime("", this.menu.element)
+//     }
 
-    PrintOneLetterAtATime(message, htmlElement, charPosition = 0) {
+//     PrintOneLetterAtATime(message, htmlElement, charPosition = 0) {
 
-        if (charPosition >= message.length) return;
+//         if (charPosition >= message.length) return;
 
-        htmlElement.innerHTML += message[charPosition++];
+//         htmlElement.innerHTML += message[charPosition++];
 
-        setTimeout(() => { this.PrintOneLetterAtATime(message, htmlElement, charPosition); }, 120); // recursion (0_0)
-    }
-}
+//         setTimeout(() => { this.PrintOneLetterAtATime(message, htmlElement, charPosition); }, 120); // recursion (0_0)
+//     }
+// }
 
-class CensorIcon {
-    constructor() {
+// class CensorIcon {
+//     constructor() {
 
-        this.element = document.createElement('img');
-        this.element.src = chrome.extension ? chrome.extension.getURL('resources/icon-large.png') : 'resources/icon-large.png';
-        this.element.classList = 'censor-icon-large';
-        this.element.style.display = "none";
-        document.body.appendChild(this.element);
-    }
-    Display(shouldDisplay) {
+//         this.element = document.createElement('img');
+//         this.element.src = chrome.extension ? chrome.extension.getURL('resources/icon-large.png') : 'resources/icon-large.png';
+//         this.element.classList = 'censor-icon-large';
+//         this.element.style.display = "none";
+//         document.body.appendChild(this.element);
+//     }
+//     Display(shouldDisplay) {
 
-        this.element.style.display = shouldDisplay ? "" : "none";
-    }
-}
+//         this.element.style.display = shouldDisplay ? "" : "none";
+//     }
+// }
 
-class CensorSettingsMenu {
-    constructor() {
+// class CensorSettingsMenu {
+//     constructor() {
 
-        this.element = document.createElement("div");
-        this.element.style.display = "none";
-        this.element.className = "censor-container";
-        document.body.appendChild(this.element);
-    }
-    Display(shouldDisplay) {
+//         this.element = document.createElement("div");
+//         this.element.style.display = "none";
+//         this.element.className = "censor-container";
+//         document.body.appendChild(this.element);
+//     }
+//     Display(shouldDisplay) {
 
-        this.element.style.display = shouldDisplay ? "" : "none";
-    }
-}
+//         this.element.style.display = shouldDisplay ? "" : "none";
+//     }
+// }
