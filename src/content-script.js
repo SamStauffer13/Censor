@@ -17,7 +17,7 @@ class Censor {
 
         if (shouldRunOnPageLoad) this.EnableCensor(true);
 
-        if (chrome.runtime.onMessage) chrome.runtime.onMessage.addListener((request) => this.EnableCensor(request.enableCensor));
+        // if (chrome.runtime.onMessage) chrome.runtime.onMessage.addListener((request) => this.EnableCensor(request.enableCensor));
     }
 
     EnableCensor(enableCensor) {
@@ -36,23 +36,23 @@ class CensorService {
 
         this.debauchery = {
 
-            "trump": "A Mad Scientist",
-            "donald trump": "A Mad Scientist",
-            "donald j. trump": "A Six Foot Tall Giant Robot",            
+            "trump": "Attack Helicopter",
+            "donald trump": "Attack Helicopter",
+            "donald j. trump": "Attack Helicopter",            
             "black lives matter" : "Attack Helicopter Lives Matter",
             "lgbt" : "Attack Helicopter",
-            "alt-right" : "Alt-J"
+            "alt-right" : "Attack Helicopters"
         }
 
-        let debouce = null;
+        let deboucer = null;
 
         this.teenageMutant = new MutationObserver(mutations => {
 
             let observer = () => mutations.forEach(mutation => this.CensorDom());
 
-            clearTimeout(debouce);
+            clearTimeout(deboucer);
 
-            debouce = setTimeout(() => observer(), 1000);
+            deboucer = setTimeout(() => observer(), 1000);
         });
     }
 
