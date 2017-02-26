@@ -2,6 +2,7 @@
 // todo: convert to .ts file and minify transpiled js, point manifest at transpiled files 
 // todo: specify browser action function in mainfest for keyboard shortcuts : https://developer.chrome.com/extensions/commands
 // todo: get opener and livereload working for faster development...
+// https://chrome.google.com/webstore/detail/censor/nhmdjmcfaiodoofhminppdjdhfifflbf
 
 'use strict'
 
@@ -32,16 +33,18 @@ class CensorService {
 
     constructor() {
 
-        this.triggerWarning = "[politics]";
+        this.triggerWarnings = [ "[politics]" ];
 
         this.debauchery = {
 
-            "trump": "Attack Helicopter",
-            "donald trump": "Attack Helicopter",
-            "donald j. trump": "Attack Helicopter",            
-            "black lives matter" : "Attack Helicopter Lives Matter",
-            "lgbt" : "Attack Helicopter",
-            "alt-right" : "Attack Helicopters"
+            "trump": "A Mad Scientist",
+            "donald trump": "A Mad Scientist",
+            "donald j. trump": "A Mad Scientist",
+            "black lives matter": "Attack Helicopter Lives Matter",
+            "lgbt": "Attack Helicopters",
+            "anti-muslim" : "Anti-Attack-Helicopter",
+            "alt-right": "Anti-Attack-Helicopters",
+            "sam stauffer" : "ಠ‿↼"
         }
 
         let deboucer = null;
@@ -78,19 +81,18 @@ class CensorService {
 
             let content = ent.currentNode.nodeValue.toLowerCase().trim();
 
-            if (content.includes(this.triggerWarning)) {
+            this.triggerWarnings.forEach((triggerWarning) => {
 
-                if (window.location.hostname == 'www.facebook.com' && ent.currentNode) {
+                if (content.includes(triggerWarning)) {
 
-                    let post = this.GetOffendingFacebookPost(ent.currentNode)
+                    if (window.location.hostname == 'www.facebook.com' && ent.currentNode) {
 
-                    if (post !== null) facebookOffenders.push(post);
+                        let post = this.GetOffendingFacebookPost(ent.currentNode)
+
+                        if (post !== null) facebookOffenders.push(post);
+                    }
                 }
-                else {
-
-                    ent.currentNode.nodeValue = "Triggered!";
-                }
-            }
+            });
 
             Object.keys(this.debauchery).forEach(trigger => {
 
