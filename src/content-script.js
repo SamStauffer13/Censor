@@ -14,11 +14,13 @@ class Censor {
 
         this.CensorService = new CensorService();
 
-        let shouldRunOnPageLoad = true; // todo, intergrate with UI class
+        this.CensorDB = new CensorDataAccess();
 
-        if (shouldRunOnPageLoad) this.EnableCensor(true);
+        let shouldRunOnPageLoad = this.CensorDB.IsCensorEnabled();
 
-        // if (chrome.runtime.onMessage) chrome.runtime.onMessage.addListener((request) => this.EnableCensor(request.enableCensor));
+        this.EnableCensor(shouldRunOnPageLoad);
+
+        if (chrome.runtime.onMessage) chrome.runtime.onMessage.addListener((request) => this.EnableCensor(request.enableCensor));
     }
 
     EnableCensor(enableCensor) {
@@ -26,6 +28,8 @@ class Censor {
         if (enableCensor === true) this.CensorService.CensorDom();
 
         this.CensorService.ListenForDomChanges(enableCensor);
+
+        this.CensorDB.UpdateCensorStatus(enableCensor);
     }
 }
 
@@ -33,7 +37,7 @@ class CensorService {
 
     constructor() {
 
-        this.triggerWarnings = [ "[politics]" ];
+        this.triggerWarnings = ["[politics]"];
 
         this.debauchery = {
 
@@ -42,9 +46,15 @@ class CensorService {
             "donald j. trump": "A Mad Scientist",
             "black lives matter": "Attack Helicopter Lives Matter",
             "lgbt": "Attack Helicopters",
-            "anti-muslim" : "Anti-Attack-Helicopter",
+            "anti-muslim": "Anti-Attack-Helicopter",
             "alt-right": "Anti-Attack-Helicopters",
-            "sam stauffer" : "ಠ‿↼"
+            "andrew robertson": "Jizz Pirate",
+            "theodoric raimund legr": "Titts",
+            "andrew r mchugh": "A Six Foot Tall Giant Robot",
+            "david barkley strawhun": "Spicy Taco Farts",
+            "alex meyer": "Wang Lord",
+            "chris givan": "Fister Roboto",
+            "sam stauffer": "ಠ‿↼"
         }
 
         let deboucer = null;
@@ -115,6 +125,29 @@ class CensorService {
 
         return `<img id="censor-kitty-photo" src="https://thecatapi.com/api/images/get?format=src&type=jpg&size=large&category=boxes"/>`
 
+    }
+}
+
+class CensorDataAccess {
+
+    constructor() {
+
+        this.CensorStatusKey = "CensorStatusKey";
+    }
+
+    IsCensorEnabled() {
+
+        let status = localStorage.getItem(this.CensorStatusKey);
+
+        if (status === null || status === '' || status === 'true') return true;
+
+        return false;
+    }
+
+    UpdateCensorStatus(isEnabled) {
+
+        console.log("censor should be enabled: ", isEnabled);
+        localStorage.setItem(this.CensorStatusKey, isEnabled);
     }
 }
 
