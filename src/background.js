@@ -1,5 +1,4 @@
 
-// let censorIsEnabled = localeStorage.getItem("isCensorEnabled");
 let censorIsEnabled = true;
 
 chrome.browserAction.onClicked.addListener(() => {
@@ -8,6 +7,7 @@ chrome.browserAction.onClicked.addListener(() => {
 
     // todo remove after testing, the presence of the helicopter icon should illustrate that the plugin is enabled/disabled
     let badgeText = censorIsEnabled ? "" : "Off";
+
     chrome.browserAction.setBadgeText({ text: badgeText });
 
     chrome.tabs.query({ active: true, currentWindow: true }, function (tabs) {

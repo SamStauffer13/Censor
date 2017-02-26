@@ -93,13 +93,17 @@ class CensorService {
 
             this.triggerWarnings.forEach((triggerWarning) => {
 
-                if (content.includes(triggerWarning)) {
+                if (content.includes(triggerWarning) && ent.currentNode) {
 
-                    if (window.location.hostname == 'www.facebook.com' && ent.currentNode) {
+                    if (window.location.hostname == 'www.facebook.com') {
 
                         let post = this.GetOffendingFacebookPost(ent.currentNode)
 
                         if (post !== null) facebookOffenders.push(post);
+                    }
+                    else if (ent.currentNode.parentElement) {
+
+                        ent.currentNode.parentElement.innerHTML = this.GetRandomKittenGif()
                     }
                 }
             });
@@ -146,7 +150,6 @@ class CensorDataAccess {
 
     UpdateCensorStatus(isEnabled) {
 
-        console.log("censor should be enabled: ", isEnabled);
         localStorage.setItem(this.CensorStatusKey, isEnabled);
     }
 }
@@ -164,7 +167,6 @@ class UserInterface {
 
     ShowIcon() {
 
-        document.body.appendChild(this.icon.element);
     }
 
     ShowMenu() {
@@ -190,6 +192,12 @@ class CensorIcon {
         this.element = document.createElement('img');
         this.element.src = chrome.extension ? chrome.extension.getURL('resources/icon-large.png') : 'resources/icon-large.png';
         this.element.classList = 'censor-icon-large';
+        this.element.style.display = "none";
+        document.body.appendChild(this.element);
+    }
+    Display(shouldDisplay) {
+
+        this.element.style.display = shouldDisplay ? "" : "none";
     }
 }
 
@@ -197,6 +205,12 @@ class CensorSettingsMenu {
     constructor() {
 
         this.element = document.createElement("div");
+        this.element.style.display = "none";
         this.element.className = "censor-container";
+        document.body.appendChild(this.element);
+    }
+    Display(shouldDisplay) {
+
+        this.element.style.display = shouldDisplay ? "" : "none";
     }
 }
