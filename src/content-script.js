@@ -1,7 +1,3 @@
-// todo: target element by  ID instead of generic class for better css specificity : https://developer.mozilla.org/en-US/docs/Web/CSS/Specificity
-// todo: convert to .ts file and minify transpiled js, point manifest at transpiled files 
-// todo: specify browser action function in mainfest for keyboard shortcuts : https://developer.chrome.com/extensions/commands
-// todo: get opener and livereload working for faster development...
 // https://chrome.google.com/webstore/detail/censor/nhmdjmcfaiodoofhminppdjdhfifflbf
 
 'use strict'
@@ -90,8 +86,6 @@ class CensorService {
 
                 if (content.includes(triggerWarning) && ent.currentNode) {
 
-                    console.log("how many times");
-
                     if (window.location.hostname == 'www.facebook.com') {
 
                         let post = this.GetOffendingFacebookPost(ent.currentNode)
@@ -116,8 +110,7 @@ class CensorService {
 
         this.facebookOffenders.forEach((offender) => {
 
-            // todo, figure out why there is excessive looping
-            if (offender.firstChild && offender.firstChild.id === 'censor-kitty-photo') return;
+            if (offender.firstChild && offender.firstChild.id === 'censor-kitty-photo') return; // todo, figure out why there is excessive looping
 
             offender.previousContents = offender.innerHTML;
 
@@ -143,7 +136,6 @@ class CensorService {
     GetRandomKittenGif() {
 
         return `<img id="censor-kitty-photo" src="https://thecatapi.com/api/images/get?format=src&type=jpg&size=large&category=boxes"/>`
-
     }
 }
 
@@ -157,7 +149,9 @@ class CensorDataAccess {
     GetTriggerWarnings() {
 
         // todo 
-        return ["[politics]"];
+        return [
+            "[politics]"
+        ];
     }
 
     GetDebauchery() {
@@ -171,8 +165,11 @@ class CensorDataAccess {
             "black lives matter": "Attack Helicopter Lives Matter",
             "lgbt": "Attack Helicopters",
             "anti-muslim": "Anti-Attack-Helicopter",
+            "anti-islam": "Anti-Attack-Helicopter",
             "alt-right": "Anti-Attack-Helicopters",
-            "sam stauffer": "ಠ‿↼"
+            "andrew r mchugh": "Andrew R. McHugh",
+            "chris givan": "Jizz Pirate",
+            "sam stauffer": "(づ￣ ³￣)づ"
         };
     }
 
@@ -191,63 +188,42 @@ class CensorDataAccess {
     }
 }
 
-// class UserInterface {
+class CensorIcon {
+    constructor() {
 
-//     constructor() {
+        this.element = document.createElement('img');
+        this.element.src = chrome.extension ? chrome.extension.getURL('resources/icon-large.png') : 'resources/icon-large.png';
+        this.element.classList = 'censor-icon-large';
+        this.element.style.display = "none";
+        document.body.appendChild(this.element);
+    }
 
-//         this.icon = new CensorIcon();
+    Display(shouldDisplay) {
 
-//         this.icon.element.onclick = () => this.ShowMenu();
+        this.element.style.display = shouldDisplay ? "" : "none";
+    }
+}
 
-//         this.menu = new CensorSettingsMenu();
-//     }
+class CensorSettingsMenu {
+    constructor() {
 
-//     ShowIcon() {
+        this.element = document.createElement("div");
+        this.element.style.display = "none";
+        this.element.className = "censor-container";
+        document.body.appendChild(this.element);
+    }
 
-//     }
+    Display(shouldDisplay) {
 
-//     ShowMenu() {
+        this.element.style.display = shouldDisplay ? "" : "none";
+    }
 
-//         document.body.appendChild(this.menu.element);
+    PrintOneLetterAtATime(message, htmlElement, charPosition = 0) {
 
-//         // this.PrintOneLetterAtATime("", this.menu.element)
-//     }
+        if (charPosition >= message.length) return;
 
-//     PrintOneLetterAtATime(message, htmlElement, charPosition = 0) {
+        htmlElement.innerHTML += message[charPosition++];
 
-//         if (charPosition >= message.length) return;
-
-//         htmlElement.innerHTML += message[charPosition++];
-
-//         setTimeout(() => { this.PrintOneLetterAtATime(message, htmlElement, charPosition); }, 120); // recursion (0_0)
-//     }
-// }
-
-// class CensorIcon {
-//     constructor() {
-
-//         this.element = document.createElement('img');
-//         this.element.src = chrome.extension ? chrome.extension.getURL('resources/icon-large.png') : 'resources/icon-large.png';
-//         this.element.classList = 'censor-icon-large';
-//         this.element.style.display = "none";
-//         document.body.appendChild(this.element);
-//     }
-//     Display(shouldDisplay) {
-
-//         this.element.style.display = shouldDisplay ? "" : "none";
-//     }
-// }
-
-// class CensorSettingsMenu {
-//     constructor() {
-
-//         this.element = document.createElement("div");
-//         this.element.style.display = "none";
-//         this.element.className = "censor-container";
-//         document.body.appendChild(this.element);
-//     }
-//     Display(shouldDisplay) {
-
-//         this.element.style.display = shouldDisplay ? "" : "none";
-//     }
-// }
+        setTimeout(() => { this.PrintOneLetterAtATime(message, htmlElement, charPosition); }, 120); // recursion (0_0)
+    }
+}
