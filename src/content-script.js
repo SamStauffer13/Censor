@@ -1,3 +1,6 @@
+// todo pull in Jasmine as nuget dependency instead of filez
+// todo impliment UI
+// todo reduce looping in watch algorithm
 // https://chrome.google.com/webstore/detail/censor/nhmdjmcfaiodoofhminppdjdhfifflbf
 
 'use strict'
@@ -8,18 +11,25 @@ class Censor {
 
         this.CensorService = new CensorService();
 
+        this.icon = new CensorIcon();
+
         if (this.CensorService.ShouldRunOnPageLoad()) this.EnableCensor(true);
 
         if (chrome.runtime.onMessage) chrome.runtime.onMessage.addListener((request) => this.EnableCensor(request.enableCensor));
     }
 
+    // todo move this behavior into the service?
     EnableCensor(enableCensor) {
 
         if (enableCensor === true) {
 
+            this.icon.Display(true);
+
             this.CensorService.CensorDom();
         }
         else {
+
+            this.icon.Display(false);
 
             this.CensorService.UnCensorDom();
         }
@@ -27,6 +37,88 @@ class Censor {
         this.CensorService.ListenForDomChanges(enableCensor);
 
         this.CensorService.UpdateCensorStatus(enableCensor);
+    }
+}
+
+// todo, how about just adding and removing from dom rather than toggling hidden?
+class CensorIcon {
+    constructor() {
+
+        this.menu = new CensorSettingsMenu();
+
+        this.element = document.createElement('img');
+        this.element.src = chrome.extension ? chrome.extension.getURL('resources/icon-large.png') : 'resources/icon-large.png';
+        this.element.classList = 'censor-icon-large';
+        
+        this.element.onclick = () => {
+
+            if (this.menu.IsDisplaying()) {
+
+                this.menu.Display(true);
+
+            } else {
+
+                this.menu.Display(false);
+            }
+        }
+
+        this.Display(false);
+        document.body.appendChild(this.element);
+    }
+
+    Display(shouldDisplay) {
+
+        if (shouldDisplay === true) {
+
+            this.element.style.display = "";
+
+        } else {
+
+            this.element.style.display = "none";
+
+            this.menu.Display(false);
+        }
+    }
+}
+
+class CensorSettingsMenu {
+    constructor() {
+
+        this.element = document.createElement("div");
+        this.element.style.display = "none";
+        this.element.className = "censor-container";
+
+        this.input = document.createElement("input");
+        this.input.className = "censor-user-input";
+        this.element.appendChild(this.input);
+
+        document.body.appendChild(this.element);
+    }
+
+    IsDisplaying() {
+
+        return this.element.style.display === "none";
+    }
+
+    Display(shouldDisplay) {
+
+        this.element.style.display = shouldDisplay === true ? "" : "none";
+    }
+
+    RunTutorial() {
+
+        this.PrintOneLetterAtATime("What is your name?", this.element);
+
+        // var secondMessage = () => this.PrintOneLetterAtATime(' click the nuke button to wipe your settings => ', this.element);        
+    }
+
+    PrintOneLetterAtATime(message, htmlElement, charPosition = 0) {
+
+        if (charPosition >= message.length) return;
+
+        htmlElement.innerHTML += message[charPosition++];
+
+        setTimeout(() => { this.PrintOneLetterAtATime(message, htmlElement, charPosition); }, 120); // recursion (0_0)
     }
 }
 
@@ -144,33 +236,54 @@ class CensorDataAccess {
     constructor() {
 
         this.CensorStatusKey = "CensorStatusKey";
-    }
+        this.CensorTriggerWarningKey = "CensorTriggerWarningKey";
+        this.CensorDebaucheryKey = "CensorDebaucheryKey";
 
-    GetTriggerWarnings() {
-
-        // todo 
-        return [
-            "[politics]"
-        ];
-    }
-
-    GetDebauchery() {
-
-        // todo 
-        return {
+        this.defaultTriggerWarnings = ['[politics]'];
+        this.defaultDebauchery = {
 
             "trump": "A Mad Scientist",
             "donald trump": "A Mad Scientist",
             "donald j. trump": "A Mad Scientist",
-            "black lives matter": "Attack Helicopter Lives Matter",
-            "lgbt": "Attack Helicopters",
+            "alt-facts": "Blowjobs",
+            "alternative facts": "Blowjobs",
+            "black lives matter": "Attack Helicopters Are People",
+            "lgbt": "Attack Helicopter's",
+            "women's": "Attack Helicopter's",
             "anti-muslim": "Anti-Attack-Helicopter",
             "anti-islam": "Anti-Attack-Helicopter",
             "alt-right": "Anti-Attack-Helicopters",
-            "andrew r mchugh": "Andrew R. McHugh",
-            "chris givan": "Jizz Pirate",
-            "sam stauffer": "(づ￣ ³￣)づ"
+            "sam stauffer": "༼ つ ◕_◕ ༽つ"
         };
+    }
+
+    // todo this pattern could be abstracted
+    GetTriggerWarnings() {
+
+        let triggerWarnings = localStorage.getItem(this.CensorTriggerWarningKey);
+
+        if (triggerWarnings === null || triggerWarnings === '') return this.defaultTriggerWarnings;
+
+        return triggerWarnings;
+    }
+
+    GetDebauchery() {
+
+        let debauchery = localStorage.getItem(this.CensorDebaucheryKey);
+
+        if (debauchery === null || debauchery === '') return this.defaultDebauchery;
+
+        return debauchery;
+    }
+
+    UpdateTriggerWarnings(triggerWarnings) {
+
+        localStorage.setItem(this.CensorTriggerWarningKey, triggerWarnings);
+    }
+
+    UpdateDebauchery(debauchery) {
+
+        localStorage.setItem(this.CensorDebaucheryKey, debauchery);
     }
 
     IsCensorEnabled() {
@@ -185,45 +298,5 @@ class CensorDataAccess {
     UpdateCensorStatus(isEnabled) {
 
         localStorage.setItem(this.CensorStatusKey, isEnabled);
-    }
-}
-
-class CensorIcon {
-    constructor() {
-
-        this.element = document.createElement('img');
-        this.element.src = chrome.extension ? chrome.extension.getURL('resources/icon-large.png') : 'resources/icon-large.png';
-        this.element.classList = 'censor-icon-large';
-        this.element.style.display = "none";
-        document.body.appendChild(this.element);
-    }
-
-    Display(shouldDisplay) {
-
-        this.element.style.display = shouldDisplay ? "" : "none";
-    }
-}
-
-class CensorSettingsMenu {
-    constructor() {
-
-        this.element = document.createElement("div");
-        this.element.style.display = "none";
-        this.element.className = "censor-container";
-        document.body.appendChild(this.element);
-    }
-
-    Display(shouldDisplay) {
-
-        this.element.style.display = shouldDisplay ? "" : "none";
-    }
-
-    PrintOneLetterAtATime(message, htmlElement, charPosition = 0) {
-
-        if (charPosition >= message.length) return;
-
-        htmlElement.innerHTML += message[charPosition++];
-
-        setTimeout(() => { this.PrintOneLetterAtATime(message, htmlElement, charPosition); }, 120); // recursion (0_0)
     }
 }

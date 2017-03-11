@@ -27,6 +27,9 @@
     opacity:0.2;
     height: auto;
     float: right;
+    position: fixed;
+    top: 1em;
+    right: 1em;
 }
 
 .censor-icon-large:hover{
@@ -36,4 +39,14 @@
 #censor-kitty-photo{
     max-width: 500px;
     height: auto;
+}
+
+.censor-user-input{
+    outline: none;
+    border: 0px none;
+    background: transparent;
+    font: inherit;
+    font-size:30px;
+    width: 100%;         
+    color: black;  
 }
