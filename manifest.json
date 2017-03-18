@@ -2,7 +2,7 @@
     "manifest_version": 2,
     "name": "Censor",
     "description": "Censors Content",
-    "version": "0.0.0.6",
+    "version": "0.0.0.7",
     "browser_action": {
         "default_icon": "resources/icon-small.png",
         "default_title": "Censor"
@@ -29,6 +29,7 @@
     ],
     "web_accessible_resources": [
         "resources/icon-large.png",
+        "resources/nuke.png",
         "resources/SummitLight-Display.ttf"
     ],
     "permissions": [

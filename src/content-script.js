@@ -1,21 +1,30 @@
 // todo pull in Jasmine as nuget dependency instead of filez
-// todo impliment UI
 // todo reduce looping in watch algorithm
 // https://chrome.google.com/webstore/detail/censor/nhmdjmcfaiodoofhminppdjdhfifflbf
-// todo on hover events, on hover of icon, on page load of icon, styling 
+
+// style elements
+// todo watermark for textboxes that clears on focus
+// missile by Jems Mayor from the Noun Project
 
 'use strict'
 class Censor {
 
     constructor() {
 
-        this.elements = new CensorElements();
-
         this.service = new CensorService();
 
-        if (this.service.ShouldRunOnPageLoad === true) {
+        let elements = new CensorElements();
+        this.icon = elements.icon;
+        this.menu = elements.menu;
+        this.messenger = elements.messenger;
+        this.saveButton = elements.saveButton;
+        this.nukeButton = elements.nuclearButton;
+        this.inputLeft = elements.inputLeft;
+        this.inputRight = elements.inputRight;
 
-            document.body.appendChild(this.elements.icon);
+        if (this.service.ShouldRunOnPageLoad() === true) {
+
+            this.icon.Display();
 
             this.service.Start();
         }
@@ -29,68 +38,64 @@ class Censor {
 
         if (enableCensor === true) {
 
-            document.body.appendChild(this.elements.icon);
+            this.icon.Display();
 
             this.service.Start();
 
         } else if (enableCensor === false) {
 
-            if (document.body.contains(this.elements.icon)) document.body.removeChild(this.elements.icon);
+            this.icon.Remove();
 
-            if (document.body.contains(this.elements.menu)) document.body.removeChild(this.elements.menu);
+            this.menu.Remove();
 
             this.service.Stop();
         }
     }
 
-    // todo refactor into smaller methods?
     SetupCensorMenu() {
 
-        this.elements.icon.onclick = () => {
+        this.icon.element.onclick = () => {
 
-            document.body.appendChild(this.elements.menu);
+            this.menu.Display();
 
-            document.body.removeChild(this.elements.icon);
+            this.icon.Remove();
         }
 
-        // this.elements.menu.onclick = () => {
+        this.inputLeft.element.onmouseover = () => this.inputLeft.element.focus();
 
-        //     document.body.appendChild(this.elements.icon);
+        this.inputRight.element.onmouseover = () => this.inputRight.element.focus();
 
-        //     document.body.removeChild(this.elements.menu);            
-        // }
+        this.saveButton.element.onmouseover = () => this.messenger.Print('Save Settings...');
 
-        let previousText = this.elements.messenger.textContent;
+        this.saveButton.element.onmouseout = () => this.messenger.DisplayPreviousText();
 
-        let restoreText = () => this.elements.messenger.textContent = previousText;
+        this.saveButton.element.onclick = () => {
 
-        this.elements.saveButton.onblur = restoreText();
+            this.service.Update(this.inputLeft.element.value, this.inputRight.element.value);
 
-        this.elements.nukeButton.onblur = restoreText();
+            this.messenger.Print('Settings Saved!');
 
-        this.elements.saveButton.onhover = () => {
-
-            previousText = this.elements.messenger.textContent;
-
-            this.elements.messenger.textContent = 'Save?';
+            setTimeout(() => this.messenger.Print('Anything else I can help you with?'), 1000);
         }
 
-        this.elements.saveButton.onclick = () => {
+        this.nukeButton.element.onmouseover = () => this.messenger.Print('Delete All Settings...');
 
-            let oldWord = this.elements.inputLeft.value;
+        this.nukeButton.element.onmouseout = () => this.messenger.DisplayPreviousText();
 
-            let newWord = this.elements.inputRight.value;
+        this.nukeButton.element.onclick = () => {
 
-            this.service.UpdateDebauchery(oldWord, newWord);
+            this.service.Delete();
 
-            this.elements.messenger.textContent = 'Updated';
+            this.messenger.Print('BOOM!');
+
+            setTimeout(() => this.messenger.Print('Anything else I can help you with?'), 1000);
         }
     }
 }
 
 class CensorElements {
 
-    // todo measure performace of this method vs others...
+    // todo measure performace of this method vs other dom building techiques...
     constructor() {
 
         let styles = {
@@ -110,17 +115,25 @@ class CensorElements {
         temp.innerHTML = `<img class='${styles.icon}' src='${this.getSrc('resources/icon-large.png')}' >
         <div class='${styles.menu}'>
             <span class='${styles.messenger}'> What can I help you with? </span>
-            <span class='${styles.spanLeft}'> Replace </span> <input class='${styles.inputLeft}' type='text' value='[Politics]' /><span class='${styles.spanRight}'> With </span> <input  type='text' value='Kittens' class='${styles.inputRight}' />
-            <img class='${styles.saveButton}' src='${this.getSrc('resources/icon-large.png')}' > <img class='${styles.nukeButton}' src='${this.getSrc('resources/icon-large.png')}' >
+            <div class=''>
+                <span class='${styles.spanLeft}'> Replace </span>
+                <input class='${styles.inputLeft}' type='text' value='Politics' />
+                <span class='${styles.spanRight}'> With </span>
+                <input  type='text' value='Kittens' class='${styles.inputRight}' />
+            </div>
+            <div> 
+                <img class='${styles.saveButton}' src='${this.getSrc('resources/icon-large.png')}'> OR <img class='${styles.nukeButton}' src='${this.getSrc('resources/nuke.png')}'>
+            </div>
         </div>`;
 
-        this.icon = temp.getElementsByClassName(styles.icon)[0];
-        this.menu = temp.getElementsByClassName(styles.menu)[0];
-        this.messenger = temp.getElementsByClassName(styles.messenger)[0];
-        this.inputLeft = temp.getElementsByClassName(styles.inputLeft)[0];
-        this.inputRight = temp.getElementsByClassName(styles.inputRight)[0];
-        this.saveButton = temp.getElementsByClassName(styles.saveButton)[0];
-        this.nuclearButton = temp.getElementsByClassName(styles.nukeButton)[0];
+        // todo research cleaner way of building dom
+        this.icon = new CensorElement(temp.getElementsByClassName(styles.icon)[0]);
+        this.menu = new CensorElement(temp.getElementsByClassName(styles.menu)[0]);
+        this.messenger = new CensorElement(temp.getElementsByClassName(styles.messenger)[0]);
+        this.inputLeft = new CensorElement(temp.getElementsByClassName(styles.inputLeft)[0]);
+        this.inputRight = new CensorElement(temp.getElementsByClassName(styles.inputRight)[0]);
+        this.saveButton = new CensorElement(temp.getElementsByClassName(styles.saveButton)[0]);
+        this.nuclearButton = new CensorElement(temp.getElementsByClassName(styles.nukeButton)[0]);
     }
     getSrc(path) {
 
@@ -133,11 +146,13 @@ class CensorElement {
     constructor(element) {
 
         this.element = element;
+
+        this.previousText = element.textContent;
     }
 
     Display() {
 
-        if (document.body.contains(this.element)) document.body.appendChild(this.element);
+        document.body.appendChild(this.element);
     }
 
     Remove() {
@@ -145,13 +160,31 @@ class CensorElement {
         if (document.body.contains(this.element)) document.body.removeChild(this.element);
     }
 
-    Print(message, charPosition = 0) {
+    DisplayPreviousText() {
+
+        this.element.textContent = this.previousText;
+
+        // this._Print(this.previousText);
+    }
+
+    Print(text) {
+
+        this.previousText = text;
+
+        this.element.textContent = text;
+
+        // this._Print(text);
+    }
+
+    _Print(message, charPosition = 0) {
+
+        if (charPosition === 0) this.element.textContent = '';
 
         if (charPosition >= message.length) return;
 
-        this.element.innerHTML += message[charPosition++];
+        this.element.textContent += message[charPosition++];
 
-        setTimeout(() => { this.PrintOneLetterAtATime(message, charPosition); }, 120); // recursion (0_0)
+        setTimeout(() => { this._Print(message, charPosition); }, 40); // recursion (0_0)
     }
 }
 
@@ -196,13 +229,33 @@ class CensorService {
         });
     }
 
-    UpdateDebauchery(oldWord, newWord) {
+    Update(oldWord, newWord) {
+
+        if (newWord === 'Kittens') {
+
+            let triggerWarnings = this.CensorDB.GetTriggerWarnings();
+
+            if (triggerWarnings.indexOf(oldWord) >= 0) return;
+
+            triggerWarnings.push(oldWord);
+
+            this.CensorDB.UpdateTriggerWarnings(triggerWarnings);
+
+            return;
+        }
 
         let debauchery = this.CensorDB.GetDebauchery();
 
         debauchery[oldWord] = newWord;
 
         this.CensorDB.UpdateDebauchery(debauchery);
+    }
+
+    Delete() {
+
+        this.CensorDB.UpdateDebauchery(null);
+
+        this.CensorDB.UpdateTriggerWarnings(null);
     }
 
     ShouldRunOnPageLoad() {
@@ -302,7 +355,7 @@ class CensorDataAccess {
 
         if (triggerWarnings === null || triggerWarnings === '') return this.defaultTriggerWarnings;
 
-        return triggerWarnings;
+        return triggerWarnings.split(',');
     }
 
     GetDebauchery() {
@@ -338,131 +391,3 @@ class CensorDataAccess {
         localStorage.setItem(this.CensorStatusKey, isEnabled);
     }
 }
-
-// todo everthing below this line is depricated
-// class CensorElement {
-
-//     constructor(name, css) {
-
-//         this.element = document.createElement(name);
-
-//         this.element.className = css;
-//     }
-
-//     // todo, rename this...
-//     Display(elementToAppendTo = document.body) {
-
-//         elementToAppendTo.appendChild(this.element);
-//     }
-
-//     Remove(elementToRemoveFrom = document.body) {
-
-//         elementToRemoveFrom.removeChild(this.element);
-//     }
-
-//     PrintOneLetterAtATime(message, charPosition = 0) {
-
-//         if (charPosition >= message.length) return;
-
-//         this.element.innerHTML += message[charPosition++];
-
-//         setTimeout(() => { this.PrintOneLetterAtATime(message, charPosition); }, 120); // recursion (0_0)
-//     }
-// }
-
-// class Censor {
-
-//     constructor() {
-
-//         this.CensorService = new CensorService();
-
-//         this.censor = new CensorOrchestrator();
-
-//         if (this.CensorService.ShouldRunOnPageLoad()) this.EnableCensor(true);
-
-//         if (chrome.runtime.onMessage) chrome.runtime.onMessage.addListener((request) => this.EnableCensor(request.enableCensor));
-//     }
-
-//     // todo move this behavior into the service
-//     EnableCensor(enableCensor) {
-
-//         if (enableCensor === true) {
-
-//             this.censor.icon.Display();
-
-//             this.CensorService.CensorDom();
-//         }
-//         else {
-
-//             this.censor.icon.Remove();
-
-//             this.CensorService.UnCensorDom();
-//         }
-
-//         this.CensorService.ListenForDomChanges(enableCensor);
-
-//         this.CensorService.UpdateCensorStatus(enableCensor);
-//     }
-// }
-
-// class CensorOrchestrator {
-
-//     constructor() {
-
-//         this.menu = new CensorMenu();
-
-//         this.icon = new CensorIcon('censor-icon-on-page');
-
-//         this.icon.element.onclick = () => {
-
-//             this.icon.Remove();
-
-//             this.menu.Display();
-
-//             this.menu.RunTutorial();
-//         };
-
-//         this.menu.element.onclick = () => {
-
-//             this.menu.Remove();
-
-//             this.icon.Display();
-//         }
-//     }
-// }
-
-// // This is over enginered
-// class CensorMenu extends CensorElement {
-
-//     constructor() {
-
-//         super('div', 'censor-container');
-
-//         this.messenger = new CensorElement('span', 'todo');
-
-//         this.messenger.Display(this.element);
-
-//         this.userInput = new CensorElement("input", "censor-user-input");
-
-//         this.userInput.Display(this.element);
-
-//         this.saveButton = new CensorIcon('censor-icon-in-menu');
-
-//         this.saveButton.Display(this.element);
-//     }
-
-//     RunTutorial() {
-
-//         this.messenger.PrintOneLetterAtATime("Welcome, creature...");
-//     }
-// }
-
-// class CensorIcon extends CensorElement {
-
-//     constructor(css) {
-
-//         super('img', css);
-
-//         this.element.src = chrome.extension ? chrome.extension.getURL('resources/icon-large.png') : 'resources/icon-large.png';
-//     }
-// }

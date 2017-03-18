@@ -5,7 +5,7 @@
 
 .censor-menu{
     padding: .25em 0;
-    opacity:.50;
+    /*opacity:.50;*/
     background-color: dimgrey;
     position:fixed;
     width:100%;
@@ -21,6 +21,11 @@
     color: white;  
 }
 
+.censor-messenger{
+    display: block;
+    padding-top: 15%;
+}
+
 .censor-icon{
     z-index:1000;
     max-width: 5%;
@@ -31,12 +36,12 @@
     top: 90%;
     right: 1em;
 }
-
+.censor-nuke-button,
 .censor-save-button{
     z-index:1000;
     max-width: 45%;
     opacity:.7; 
-    /*animation: aerial-maneuver 4s;
+    /*animation: aerial-maneuver 4s;*/
 }
 
 @keyframes aerial-maneuver {
@@ -45,8 +50,8 @@
 }
 
 .censor-icon:hover,
-.censor-save-button,
-.censor-nuke-button{
+.censor-save-button:hover,
+.censor-nuke-button:hover{
     opacity:1;
 }
 
