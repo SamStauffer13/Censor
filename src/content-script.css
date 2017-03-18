@@ -3,9 +3,9 @@
     src: url('chrome-extension://__MSG_@@extension_id__/resources/SummitLight-Display.ttf'), url(../resources/SummitLight-Display.ttf);    
 }
 
-.censor-container{
+.censor-menu{
     padding: .25em 0;
-    opacity:.1;
+    opacity:.50;
     background-color: dimgrey;
     position:fixed;
     width:100%;
@@ -21,7 +21,7 @@
     color: white;  
 }
 
-.censor-icon-on-page{
+.censor-icon{
     z-index:1000;
     max-width: 5%;
     opacity:0.2;
@@ -32,23 +32,21 @@
     right: 1em;
 }
 
-.censor-icon-in-menu{
+.censor-save-button{
     z-index:1000;
     max-width: 45%;
-    opacity:.7;
-    height: auto;
-    position: fixed;
-    top: 40%;    
-    animation: aerial-maneuver 4s;
+    opacity:.7; 
+    /*animation: aerial-maneuver 4s;
 }
 
 @keyframes aerial-maneuver {
-    0%  {-webkit-transform: rotate(0deg); float: left;}
+    0%  {-webkit-transform: rotate(0deg); }
     100% {-webkit-transform: rotate(360deg); float: right;}   
 }
 
-.censor-icon-in-menu:hover,
-.censor-icon-on-page:hover{
+.censor-icon:hover,
+.censor-save-button,
+.censor-nuke-button{
     opacity:1;
 }
 
@@ -57,7 +55,8 @@
     height: auto;
 }
 
-.censor-user-input{
+.censor-input-left,
+.censor-input-right{
     outline: none;
     border: 0px none;
     background: transparent;
