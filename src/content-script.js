@@ -3,7 +3,6 @@
 // https://chrome.google.com/webstore/detail/censor/nhmdjmcfaiodoofhminppdjdhfifflbf
 
 // style elements
-// todo watermark for textboxes that clears on focus
 // missile by Jems Mayor from the Noun Project
 
 'use strict'
@@ -61,34 +60,41 @@ class Censor {
             this.icon.Remove();
         }
 
+        this.menu.element.onclick = () => {
+
+            this.menu.Remove();
+
+            this.icon.Display();
+        }
+
         this.inputLeft.element.onmouseover = () => this.inputLeft.element.focus();
+
+        this.inputLeft.element.onclick = (e) => e.stopPropagation();
 
         this.inputRight.element.onmouseover = () => this.inputRight.element.focus();
 
-        this.saveButton.element.onmouseover = () => this.messenger.Print('Save Settings...');
+        this.inputRight.element.onclick = (e) => e.stopPropagation();
 
-        this.saveButton.element.onmouseout = () => this.messenger.DisplayPreviousText();
+        this.saveButton.element.onclick = (e) => {
 
-        this.saveButton.element.onclick = () => {
+            e.stopPropagation();
 
             this.service.Update(this.inputLeft.element.value, this.inputRight.element.value);
 
-            this.messenger.Print('Settings Saved!');
+            this.messenger.Print('BOOM! settings updated...');
 
-            setTimeout(() => this.messenger.Print('Anything else I can help you with?'), 1000);
+            setTimeout(() => this.messenger.Print('Need anything else?'), 2000);
         }
 
-        this.nukeButton.element.onmouseover = () => this.messenger.Print('Delete All Settings...');
+        this.nukeButton.element.onclick = (e) => {
 
-        this.nukeButton.element.onmouseout = () => this.messenger.DisplayPreviousText();
-
-        this.nukeButton.element.onclick = () => {
+            e.stopPropagation();
 
             this.service.Delete();
 
-            this.messenger.Print('BOOM!');
+            this.messenger.Print("BOOM! settings reset...");
 
-            setTimeout(() => this.messenger.Print('Anything else I can help you with?'), 1000);
+            setTimeout(() => this.messenger.Print('Need anything else?'), 2000);
         }
     }
 }
@@ -114,12 +120,10 @@ class CensorElements {
 
         temp.innerHTML = `<img class='${styles.icon}' src='${this.getSrc('resources/icon-large.png')}' >
         <div class='${styles.menu}'>
-            <span class='${styles.messenger}'> What can I help you with? </span>
+            <span class='${styles.messenger}'></span>
             <div class=''>
-                <span class='${styles.spanLeft}'> Replace </span>
-                <input class='${styles.inputLeft}' type='text' value='Politics' />
-                <span class='${styles.spanRight}'> With </span>
-                <input  type='text' value='Kittens' class='${styles.inputRight}' />
+                <span class='${styles.spanLeft}'> Replace </span> <input class='${styles.inputLeft}' type='text' placeholder='Politics' />
+                <span class='${styles.spanRight}'> With </span> <input  type='text' placeholder='Kittens' class='${styles.inputRight}' />
             </div>
             <div> 
                 <img class='${styles.saveButton}' src='${this.getSrc('resources/icon-large.png')}'> OR <img class='${styles.nukeButton}' src='${this.getSrc('resources/nuke.png')}'>
@@ -136,7 +140,6 @@ class CensorElements {
         this.nuclearButton = new CensorElement(temp.getElementsByClassName(styles.nukeButton)[0]);
     }
     getSrc(path) {
-
         return chrome.extension ? chrome.extension.getURL(path) : path;
     }
 }
@@ -146,8 +149,6 @@ class CensorElement {
     constructor(element) {
 
         this.element = element;
-
-        this.previousText = element.textContent;
     }
 
     Display() {
@@ -160,16 +161,7 @@ class CensorElement {
         if (document.body.contains(this.element)) document.body.removeChild(this.element);
     }
 
-    DisplayPreviousText() {
-
-        this.element.textContent = this.previousText;
-
-        // this._Print(this.previousText);
-    }
-
     Print(text) {
-
-        this.previousText = text;
 
         this.element.textContent = text;
 
@@ -204,6 +196,7 @@ class CensorService {
 
             clearTimeout(deboucer);
 
+            // todo deboucer isnt working
             deboucer = setTimeout(() => observer(), 1000);
         });
     }
@@ -231,7 +224,13 @@ class CensorService {
 
     Update(oldWord, newWord) {
 
-        if (newWord === 'Kittens') {
+        oldWord = oldWord.toLowerCase();
+        newWord = newWord.toLowerCase();
+
+        // todo handle paradox's?
+        if (oldWord === '' || newWord === '') return;
+
+        if (newWord === 'kittens') {
 
             let triggerWarnings = this.CensorDB.GetTriggerWarnings();
 
@@ -264,7 +263,6 @@ class CensorService {
     }
 
     _CensorDom(domToParse = document.body) {
-
         let ent = document.createTreeWalker(domToParse, NodeFilter.SHOW_TEXT);
 
         while (ent.nextNode()) {
@@ -285,17 +283,16 @@ class CensorService {
                     }
                     else if (ent.currentNode.parentElement) {
 
-                        ent.currentNode.parentElement.innerHTML = this.GetRandomKittenGif()
+                        ent.currentNode.parentElement.innerHTML = this._GetRandomKittenGif()
                     }
                 }
             });
 
             let debauchery = this.CensorDB.GetDebauchery();
 
-            Object.keys(debauchery).forEach(trigger => {
-
+            Object.keys(debauchery).forEach(trigger => {                
+                trigger = trigger.toLowerCase().trim();
                 if (content.includes(trigger)) ent.currentNode.nodeValue = content.replace(trigger, debauchery[trigger]);
-
             });
         }
 
@@ -353,7 +350,7 @@ class CensorDataAccess {
 
         let triggerWarnings = localStorage.getItem(this.CensorTriggerWarningKey);
 
-        if (triggerWarnings === null || triggerWarnings === '') return this.defaultTriggerWarnings;
+        if (triggerWarnings === null || triggerWarnings === '' || triggerWarnings === 'null') return this.defaultTriggerWarnings;
 
         return triggerWarnings.split(',');
     }
@@ -361,10 +358,20 @@ class CensorDataAccess {
     GetDebauchery() {
 
         let debauchery = localStorage.getItem(this.CensorDebaucheryKey);
+        if (debauchery === null || debauchery === '' || debauchery === 'null') return this.defaultDebauchery;
 
-        if (debauchery === null || debauchery === '') return this.defaultDebauchery;
+        try {
 
-        return debauchery;
+            return JSON.parse(debauchery);
+
+        } catch (e) {
+
+            console.error('unable to parse ', debauchery, e)
+
+            localStorage.clear();
+
+            return this.defaultDebauchery;
+        }
     }
 
     UpdateTriggerWarnings(triggerWarnings) {
@@ -374,7 +381,7 @@ class CensorDataAccess {
 
     UpdateDebauchery(debauchery) {
 
-        localStorage.setItem(this.CensorDebaucheryKey, debauchery);
+        localStorage.setItem(this.CensorDebaucheryKey, JSON.stringify(debauchery));
     }
 
     IsCensorEnabled() {
