@@ -1,15 +1,14 @@
 describe('On page load, Censor ', () => {
+     it(`will replace politics with kittys`, () => {
 
-    let defaultTriggerWord = '[Politics]'
+        // let div = document.createElement("div")
 
-    it(`will replace ${defaultTriggerWord} with Kittys`, () => {
+        // div.innerHTML = defaultTriggerWord
 
-        let div = document.createElement("div")
+        // document.body.appendChild(div)
 
-        div.innerHTML = defaultTriggerWord
+        // expect(defaultTriggerWord.innerHTML).not.toBe(defaultTriggerWord)
 
-        document.body.appendChild(div)
-
-        expect(defaultTriggerWord.innerHTML).not.toBe(defaultTriggerWord)
+        expect(true).toBe(false);
     })
 })
