@@ -8,8 +8,7 @@ export class Censor {
 
     constructor() {
 
-        this.service = new CensorService();
-
+        this.service = new CensorService();        
         let elements = new CensorElements();
         this.icon = elements.icon;
         this.menu = elements.menu;
@@ -151,7 +150,7 @@ class CensorElement {
 
     Display() {
 
-        console.log(document);
+        
         document.body.appendChild(this.element);
     }
 
@@ -326,7 +325,7 @@ class CensorDataAccess {
         this.CensorTriggerWarningKey = "CensorTriggerWarningKey";
         this.CensorDebaucheryKey = "CensorDebaucheryKey";
         this.defaultTriggerWarnings = ['[politics]'];
-        this.defaultDebauchery = { "sam stauffer": "༼ つ ◕_◕ ༽つ" };
+        this.defaultDebauchery = { "sam stauffer": "༼ つ ◕_◕ ༽つ" };        
     }
 
     // todo this pattern could be abstracted
