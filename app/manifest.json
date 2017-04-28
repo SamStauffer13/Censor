@@ -9,7 +9,7 @@
     },
     "background": {
         "scripts": [
-            "src/background.js"
+            "background.js"
         ]
     },
     "content_scripts": [
@@ -19,11 +19,10 @@
                 "https://*/*"
             ],
             "js": [
-                "src/content-script.js",
-                "src/content-script-init.js"
+                "content-app.js"                
             ],
             "css": [
-                "src/content-script.css"
+                "content-app.css"
             ]
         }
     ],

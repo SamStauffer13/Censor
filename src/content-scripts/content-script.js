@@ -1,12 +1,10 @@
-// todo pull in Jasmine as nuget dependency instead of filez
+// todo setup beefy
 // todo reduce looping in watch algorithm
+// todo improve UI creation algorithm
 // https://chrome.google.com/webstore/detail/censor/nhmdjmcfaiodoofhminppdjdhfifflbf
 
-// style elements
-// missile by Jems Mayor from the Noun Project
-
 'use strict'
-class Censor {
+export class Censor {
 
     constructor() {
 
@@ -118,7 +116,7 @@ class CensorElements {
 
         let temp = document.createElement('div');
 
-        temp.innerHTML = `<img class='${styles.icon}' src='${this.getSrc('resources/icon-large.png')}' >
+        temp.innerHTML = `<img class='${styles.icon}' src='${this.getSrc('app/resources/icon-large.png')}' >
         <div class='${styles.menu}'>
             <span class='${styles.messenger}'></span>
             <div class=''>
@@ -126,7 +124,7 @@ class CensorElements {
                 <span class='${styles.spanRight}'> With </span> <input  type='text' placeholder='Kittens' class='${styles.inputRight}' />
             </div>
             <div> 
-                <img class='${styles.saveButton}' src='${this.getSrc('resources/icon-large.png')}'> OR <img class='${styles.nukeButton}' src='${this.getSrc('resources/nuke.png')}'>
+                <img class='${styles.saveButton}' src='${this.getSrc('app/resources/icon-large.png')}'> OR <img class='${styles.nukeButton}' src='${this.getSrc('app/resources/nuke.png')}'>
             </div>
         </div>`;
 
@@ -153,6 +151,7 @@ class CensorElement {
 
     Display() {
 
+        console.log(document);
         document.body.appendChild(this.element);
     }
 
@@ -290,7 +289,7 @@ class CensorService {
 
             let debauchery = this.CensorDB.GetDebauchery();
 
-            Object.keys(debauchery).forEach(trigger => {                
+            Object.keys(debauchery).forEach(trigger => {
                 trigger = trigger.toLowerCase().trim();
                 if (content.includes(trigger)) ent.currentNode.nodeValue = content.replace(trigger, debauchery[trigger]);
             });
@@ -326,23 +325,8 @@ class CensorDataAccess {
         this.CensorStatusKey = "CensorStatusKey";
         this.CensorTriggerWarningKey = "CensorTriggerWarningKey";
         this.CensorDebaucheryKey = "CensorDebaucheryKey";
-
         this.defaultTriggerWarnings = ['[politics]'];
-        this.defaultDebauchery = {
-
-            "trump": "A Mad Scientist",
-            "donald trump": "A Mad Scientist",
-            "donald j. trump": "A Mad Scientist",
-            "alt-facts": "Blowjobs",
-            "alternative facts": "Blowjobs",
-            "black lives matter": "Attack Helicopters Are People",
-            "lgbt": "Attack Helicopter's",
-            "women's": "Attack Helicopter's",
-            "anti-muslim": "Anti-Attack-Helicopter",
-            "anti-islam": "Anti-Attack-Helicopter",
-            "alt-right": "Anti-Attack-Helicopters",
-            "sam stauffer": "༼ つ ◕_◕ ༽つ"
-        };
+        this.defaultDebauchery = { "sam stauffer": "༼ つ ◕_◕ ༽つ" };
     }
 
     // todo this pattern could be abstracted
