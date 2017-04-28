@@ -134,6 +134,7 @@ class CensorElements {
         this.inputLeft = new CensorElement(temp.getElementsByClassName(styles.inputLeft)[0]);
         this.inputRight = new CensorElement(temp.getElementsByClassName(styles.inputRight)[0]);
         this.saveButton = new CensorElement(temp.getElementsByClassName(styles.saveButton)[0]);
+        console.log(this.saveButton)
         this.nuclearButton = new CensorElement(temp.getElementsByClassName(styles.nukeButton)[0]);
     }
     getSrc(path) {

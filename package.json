@@ -2,7 +2,7 @@
   "name": "censor",
   "version": "3.0.0",
   "scripts": {
-    "start": "npm run build:content | npm run build:background | live-server --entry-file=integration-tests.html --wait=500",
+    "start": "npm run build:content | live-server --entry-file=spec-runner.html --wait=500",
     "lint": "eslint src/",
     "build:content": "watchify -d -v -t babelify src/content-scripts/content-script-init.js -p [minifyify --no-map] -o app/content-app.js",
     "build:background": "watchify -d -v -t babelify src/background.js -p [minifyify --no-map] -o app/background-app.js"
@@ -16,6 +16,7 @@
     "browserify": "^14.3.0",
     "eslint": "^3.8.1",
     "jasmine": "^2.6.0",
+    "live-server": "^1.2.0",
     "opener": "*",
     "watchify": "^3.9.0"
   },
