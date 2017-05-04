@@ -2,10 +2,12 @@
   "name": "censor",
   "version": "3.0.0",
   "scripts": {
-    "start": "npm run build:content | live-server --entry-file=spec-runner.html --wait=500",
+    "start": "npm run build | live-server --entry-file=spec-runner.html --wait=500",
     "lint": "eslint src/",
-    "build:content": "watchify -d -v -t babelify src/content-scripts/content-script-init.js -p [minifyify --no-map] -o app/content-app.js",
-    "build:background": "watchify -d -v -t babelify src/background.js -p [minifyify --no-map] -o app/background-app.js"
+    "build": "npm run build:content | npm run build:background",
+    "build:content": "watchify -t babelify src/content-scripts/content-script-init.js -p [minifyify --no-map]  -o app/content-app.js",
+    "build:background": "watchify -t babelify src/background.js -p [minifyify --no-map] -o app/background-app.js",
+    "build:css": "watchify src/content-scripts/content-script.css -o app/content-app.css"
   },
   "dependencies": {},
   "devDependencies": {
@@ -14,9 +16,11 @@
     "babel-preset-es2015": "^6.16.0",
     "babelify": "^7.3.0",
     "browserify": "^14.3.0",
+    "browserify-css": "^0.10.0",
     "eslint": "^3.8.1",
     "jasmine": "^2.6.0",
     "live-server": "^1.2.0",
+    "minifyify": "^7.3.5",
     "opener": "*",
     "watchify": "^3.9.0"
   },

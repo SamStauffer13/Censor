@@ -1,3 +1,4 @@
-import {Censor} from "./content-script.js";
+import {Censor} from "./content-script.js"
 
-let censor = new Censor();
+
+let censor = new Censor()

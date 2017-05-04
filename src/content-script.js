@@ -1,23 +1,23 @@
+// todo pull in Jasmine as nuget dependency instead of filez
 // todo reduce looping in watch algorithm
-// todo improve UI creation algorithm
-// program escape key
-// program enter key
-// update replaced on save
-// hitting icon with menu open wipes all settings
-// uglify in package.json
-// compile css via browserify
 // https://chrome.google.com/webstore/detail/censor/nhmdjmcfaiodoofhminppdjdhfifflbf
-// todo impliment Bias calculator. Highlights trigger words… Gives count of how Biased news source is… 
-// no need for semi colons
+
+// style elements
+// missile by Jems Mayor from the Noun Project
+
 'use strict'
-export class Censor {
+class Censor {
 
     constructor() {
 
         this.service = new CensorService();
+
         let elements = new CensorElements();
         this.icon = elements.icon;
         this.menu = elements.menu;
+        this.messenger = elements.messenger;
+        this.saveButton = elements.saveButton;
+        this.nukeButton = elements.nuclearButton;
         this.inputLeft = elements.inputLeft;
         this.inputRight = elements.inputRight;
 
@@ -74,12 +74,34 @@ export class Censor {
         this.inputRight.element.onmouseover = () => this.inputRight.element.focus();
 
         this.inputRight.element.onclick = (e) => e.stopPropagation();
+
+        this.saveButton.element.onclick = (e) => {
+
+            e.stopPropagation();
+
+            this.service.Update(this.inputLeft.element.value, this.inputRight.element.value);
+
+            this.messenger.Print('BOOM! settings updated...');
+
+            setTimeout(() => this.messenger.Print('Need anything else?'), 2000);
+        }
+
+        this.nukeButton.element.onclick = (e) => {
+
+            e.stopPropagation();
+
+            this.service.Delete();
+
+            this.messenger.Print("BOOM! settings reset...");
+
+            setTimeout(() => this.messenger.Print('Need anything else?'), 2000);
+        }
     }
 }
 
-// unhid instead of display, extend display method instead of seperate class... return an array from a service rather than an object...
 class CensorElements {
 
+    // todo measure performace of this method vs other dom building techiques...
     constructor() {
 
         let styles = {
@@ -91,29 +113,21 @@ class CensorElements {
             inputRight: 'censor-input-right',
         };
 
-        var temp = document.createElement('div');
-        document.body.appendChild(temp);
-        temp.outerHTML = `<div style='display: none'>
-            <img id='${styles.icon}' src='${this.getSrc('app/resources/icon-large.png')}' >
-            <div id='${styles.menu}'>
-                    <span id='${styles.spanLeft}' > Replace <input id='${styles.inputLeft}' type='text' placeholder='[politics]' /> </span>
-                    <span id='${styles.spanRight}'> With <input type='text' placeholder='kittens' id='${styles.inputRight}' /> </span> 
-            </div>
-        </div>`
+        let temp = document.createElement('div');
 
-        this.icon = new CensorElement(document.getElementById(styles.icon));
-        this.menu = new CensorElement(document.getElementById(styles.menu));
-        this.inputLeft = new CensorElement(document.getElementById(styles.inputLeft));
-        this.inputRight = new CensorElement(document.getElementById(styles.inputRight));
+        temp.innerHTML = `<img class='${styles.icon}' src='${this.getSrc('resources/icon-large.png')}' >
+        <div class='${styles.menu}'>
+                <span class='${styles.spanLeft}'> Replace <input class='${styles.inputLeft}' type='text' placeholder='Politics' /> </span> 
+                <span class='${styles.spanRight}'> With <input  type='text' placeholder='Kittens' class='${styles.inputRight}' /> </span>             
+        </div>`;
 
-        // let elements = []
-        // styles.forEach((style) => {
-        //     let element = document.getElementById(style)
-        //     element.display = () => { }
-        //     element.hide = () => { }
-        //     elements.push(element)
-        // })        
-        // return elements
+        // todo research cleaner way of building dom
+        this.icon = new CensorElement(temp.getElementsByClassName(styles.icon)[0]);
+        this.menu = new CensorElement(temp.getElementsByClassName(styles.menu)[0]);
+        this.spanLeft = new CensorElement(temp.getElementsByClassName(styles.spanLeft)[0]);
+        this.inputLeft = new CensorElement(temp.getElementsByClassName(styles.inputLeft)[0]);
+        this.spanRight = new CensorElement(temp.getElementsByClassName(styles.spanRight)[0]);
+        this.inputRight = new CensorElement(temp.getElementsByClassName(styles.inputRight)[0]);        
     }
     getSrc(path) {
         return chrome.extension ? chrome.extension.getURL(path) : path;
@@ -128,7 +142,6 @@ class CensorElement {
     }
 
     Display() {
-
 
         document.body.appendChild(this.element);
     }
@@ -249,7 +262,7 @@ class CensorService {
 
             let debauchery = this.CensorDB.GetDebauchery();
 
-            Object.keys(debauchery).forEach(trigger => {
+            Object.keys(debauchery).forEach(trigger => {                
                 trigger = trigger.toLowerCase().trim();
                 if (content.includes(trigger)) ent.currentNode.nodeValue = content.replace(trigger, debauchery[trigger]);
             });
@@ -285,8 +298,9 @@ class CensorDataAccess {
         this.CensorStatusKey = "CensorStatusKey";
         this.CensorTriggerWarningKey = "CensorTriggerWarningKey";
         this.CensorDebaucheryKey = "CensorDebaucheryKey";
+
         this.defaultTriggerWarnings = ['[politics]'];
-        this.defaultDebauchery = { "sam stauffer": "༼ つ ◕_◕ ༽つ" };
+        this.defaultDebauchery = {"sam stauffer": "༼ つ ◕_◕ ༽つ"};
     }
 
     // todo this pattern could be abstracted

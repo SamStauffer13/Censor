@@ -4,7 +4,7 @@
     /*src: url('chrome-extension://__MSG_@@extension_id__/resources/SummitLight-Display.ttf'), url(app/SummitLight-Display.ttf); */
 }
 
-#censor-menu{
+.censor-menu{
     padding: .25em 0 !important;
     opacity:.90 !important;
     background-color: black !important;
@@ -25,12 +25,12 @@
     color: white !important;  
 }
 
-#censor-span-right,
-#censor-span-left{
+.censor-span-right,
+.censor-span-left{
     display: block;
 }
-#censor-input-left,
-#censor-input-right{
+.censor-input-left,
+.censor-input-right{
     text-align: center;
     display: block !important;
     outline: none !important;
@@ -42,8 +42,8 @@
     display: block;
 }
 
-#censor-input-left::-webkit-input-placeholder,
-#censor-input-right::-webkit-input-placeholder{  
+.censor-input-left::-webkit-input-placeholder,
+.censor-input-right::-webkit-input-placeholder{  
     color: inherit !important;      
 }
 
@@ -57,7 +57,7 @@
     100% {-webkit-transform: rotate(360deg); float: right;}   
 }*/
 
-#censor-icon{
+.censor-icon{
     z-index:1000 !important;
     max-width: 5% !important;
     opacity:0.2 !important;
@@ -68,6 +68,6 @@
     right: 1em !important;
 }
 
-#censor-icon:hover{
+.censor-icon:hover{
     opacity:1 !important;
 }
