@@ -1,14 +1,17 @@
-
-let censorIsEnabled = true;
+let censorIsEnabled = true
 
 chrome.browserAction.onClicked.addListener(() => {
 
-    censorIsEnabled = !censorIsEnabled;
+    censorIsEnabled = !censorIsEnabled
 
-    chrome.tabs.query({ active: true, currentWindow: true }, function (tabs) {
+    const settings = { active: true, currentWindow: true }
 
-        let currentOpenTab = tabs[0].id;
+    chrome.tabs.query(settings, (tabs) => {
 
-        chrome.tabs.sendMessage(currentOpenTab, { enableCensor: censorIsEnabled }, (response) => { });
-    });
-});
+        const currentOpenTab = tabs[0].id
+
+        const request = { enableCensor: censorIsEnabled }
+
+        chrome.tabs.sendMessage(currentOpenTab, request, (response) => { })
+    })
+})

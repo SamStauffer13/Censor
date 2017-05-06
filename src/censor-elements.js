@@ -1,62 +1,40 @@
-
-// unhid instead of display, extend display method instead of seperate class... return an array from a service rather than an object...
 export class CensorElements {
-
     constructor() {
-
-        let styles = {
+        const styles = {
             icon: 'censor-icon',
             menu: 'censor-menu',
+            theD: 'censor-the-d',
             spanLeft: 'censor-span-left',
             inputLeft: 'censor-input-left',
             spanRight: 'censor-span-right',
             inputRight: 'censor-input-right',
         };
 
-        var temp = document.createElement('div');
-        document.body.appendChild(temp);
-        temp.outerHTML = `<div style='display: none'>
-            <img id='${styles.icon}' src='${this.getSrc('app/resources/icon-large.png')}' >
+        let template = document.createElement('div')
+        document.body.appendChild(template)
+        template.outerHTML = `<img id='${styles.icon}' src='${chrome.extension ? chrome.extension.getURL('app/resources/icon-large.png') : 'app/resources/icon-large.png'}' >
             <div id='${styles.menu}'>
-                    <span id='${styles.spanLeft}' > Replace <input id='${styles.inputLeft}' type='text' placeholder='[politics]' /> </span>
+                    <span id='${styles.spanLeft}' > Replace<span id=${styles.theD}>D</span> <input id='${styles.inputLeft}' type='text' placeholder='[politics]' /> </span>
                     <span id='${styles.spanRight}'> With <input type='text' placeholder='kittens' id='${styles.inputRight}' /> </span> 
-            </div>
-        </div>`
-
-        this.icon = new CensorElement(document.getElementById(styles.icon));
-        this.menu = new CensorElement(document.getElementById(styles.menu));
-        this.inputLeft = new CensorElement(document.getElementById(styles.inputLeft));
-        this.inputRight = new CensorElement(document.getElementById(styles.inputRight));
-
-        // let elements = []
-        // styles.forEach((style) => {
-        //     let element = document.getElementById(style)
-        //     element.display = () => { }
-        //     element.hide = () => { }
-        //     elements.push(element)
-        // })        
-        // return elements
-    }
-    getSrc(path) {
-        return chrome.extension ? chrome.extension.getURL(path) : path;
+            </div>`
+        this.icon = new CensorElement(styles.icon)
+        this.menu = new CensorElement(styles.menu)
+        this.theD = new CensorElement(styles.theD)
+        this.inputLeft = new CensorElement(styles.inputLeft)
+        this.inputRight = new CensorElement(styles.inputRight)
     }
 }
 
 class CensorElement {
-
-    constructor(element) {
-
-        this.element = element;
+    constructor(id) {
+        this.e = document.getElementById(id)
+        this.e.onclick = (e) => e.stopPropagation()
+        this.isShowing = this.e.style.display != 'none'
     }
-
-    Display() {
-
-
-        document.body.appendChild(this.element);
+    show() {
+        this.e.style.display = 'inline'
     }
-
-    Remove() {
-
-        if (document.body.contains(this.element)) document.body.removeChild(this.element);
+    hide() {
+        if (this.isShowing) this.e.style.display = 'none'
     }
 }

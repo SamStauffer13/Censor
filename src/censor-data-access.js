@@ -1,4 +1,3 @@
-
 export class CensorDataAccess {
 
     constructor() {
@@ -11,7 +10,7 @@ export class CensorDataAccess {
     }
 
     // todo this pattern could be abstracted
-    GetTriggerWarnings() {
+    getTriggerWarnings() {
 
         let triggerWarnings = localStorage.getItem(this.CensorTriggerWarningKey);
 
@@ -20,7 +19,7 @@ export class CensorDataAccess {
         return triggerWarnings.split(',');
     }
 
-    GetDebauchery() {
+    getDebauchery() {
 
         let debauchery = localStorage.getItem(this.CensorDebaucheryKey);
         if (debauchery === null || debauchery === '' || debauchery === 'null') return this.defaultDebauchery;
@@ -39,17 +38,17 @@ export class CensorDataAccess {
         }
     }
 
-    UpdateTriggerWarnings(triggerWarnings) {
+    updateTriggerWarnings(triggerWarnings) {
 
         localStorage.setItem(this.CensorTriggerWarningKey, triggerWarnings);
     }
 
-    UpdateDebauchery(debauchery) {
+    updateDebauchery(debauchery) {
 
         localStorage.setItem(this.CensorDebaucheryKey, JSON.stringify(debauchery));
     }
 
-    IsCensorEnabled() {
+    isCensorEnabled() {
 
         let status = localStorage.getItem(this.CensorStatusKey);
 
@@ -58,7 +57,7 @@ export class CensorDataAccess {
         return false;
     }
 
-    UpdateCensorStatus(isEnabled) {
+    updateCensorStatus(isEnabled) {
 
         localStorage.setItem(this.CensorStatusKey, isEnabled);
     }

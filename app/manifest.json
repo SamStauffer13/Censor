@@ -9,7 +9,7 @@
     },
     "background": {
         "scripts": [
-            "background-app.js"
+            "background.js"
         ]
     },
     "content_scripts": [
@@ -19,16 +19,15 @@
                 "https://*/*"
             ],
             "js": [
-                "content-app.js"                
+                "content-script.js"                
             ],
             "css": [
-                "content-app.css"
+                "content-script.css"
             ]
         }
     ],
     "web_accessible_resources": [
         "resources/icon-large.png",
-        "resources/nuke.png",
         "resources/SummitLight-Display.ttf"
     ],
     "permissions": [

@@ -1,5 +1,11 @@
 import {CensorDataAccess} from "./censor-data-access.js"
 
+// todo reduce looping in watch algorithm
+// todo impliment Bias calculator. Highlights trigger words… Gives count of how Biased news source is… 
+// todo fix debounce method
+// todo handle paradoxs
+// todo ignore censor from watching for changes on censor menu
+// todo only replace whole words not just characters in words, so if a user types a, censor shouldn't replace the a in every word
 export class CensorService {
 
     constructor() {
@@ -12,29 +18,28 @@ export class CensorService {
 
         this.teenageMutant = new MutationObserver(mutations => {
 
-            let observer = () => mutations.forEach(mutation => this._CensorDom());
+            let observer = () => mutations.forEach(mutation => this._censorDom());
 
             clearTimeout(deboucer);
-
-            // todo deboucer isnt working
+            
             deboucer = setTimeout(() => observer(), 1000);
         });
     }
 
-    Start() {
+    start() {
 
-        this._CensorDom();
+        this._censorDom();
 
         this.teenageMutant.observe(document.body, { childList: true });
 
-        this.CensorDB.UpdateCensorStatus(true);
+        this.CensorDB.updateCensorStatus(true);
     }
 
-    Stop() {
+    stop() {
 
         this.teenageMutant.disconnect();
 
-        this.CensorDB.UpdateCensorStatus(false);
+        this.CensorDB.updateCensorStatus(false);
 
         this.facebookOffenders.forEach((offender) => {
 
@@ -42,54 +47,53 @@ export class CensorService {
         });
     }
 
-    Update(oldWord, newWord) {
+    update(oldWord, newWord) {
 
         oldWord = oldWord.toLowerCase();
         newWord = newWord.toLowerCase();
 
-        // todo handle paradox's?
         if (oldWord === '' || newWord === '') return;
 
         if (newWord === 'kittens') {
 
-            let triggerWarnings = this.CensorDB.GetTriggerWarnings();
+            let triggerWarnings = this.CensorDB.getTriggerWarnings();
 
             if (triggerWarnings.indexOf(oldWord) >= 0) return;
 
             triggerWarnings.push(oldWord);
 
-            this.CensorDB.UpdateTriggerWarnings(triggerWarnings);
+            this.CensorDB.updateTriggerWarnings(triggerWarnings);
 
             return;
         }
 
-        let debauchery = this.CensorDB.GetDebauchery();
+        let debauchery = this.CensorDB.getDebauchery();
 
         debauchery[oldWord] = newWord;
 
-        this.CensorDB.UpdateDebauchery(debauchery);
+        this.CensorDB.updateDebauchery(debauchery);
     }
 
-    Delete() {
+    delete() {
 
-        this.CensorDB.UpdateDebauchery(null);
+        this.CensorDB.updateDebauchery(null);
 
-        this.CensorDB.UpdateTriggerWarnings(null);
+        this.CensorDB.updateTriggerWarnings(null);
     }
 
-    ShouldRunOnPageLoad() {
+    shouldRunOnPageLoad() {
 
-        return this.CensorDB.IsCensorEnabled();
+        return this.CensorDB.isCensorEnabled();
     }
 
-    _CensorDom(domToParse = document.body) {
+    _censorDom(domToParse = document.body) {
         let ent = document.createTreeWalker(domToParse, NodeFilter.SHOW_TEXT);
 
         while (ent.nextNode()) {
 
             let content = ent.currentNode.nodeValue.toLowerCase().trim();
 
-            let triggerWarnings = this.CensorDB.GetTriggerWarnings();
+            let triggerWarnings = this.CensorDB.getTriggerWarnings();
 
             triggerWarnings.forEach((triggerWarning) => {
 
@@ -97,18 +101,18 @@ export class CensorService {
 
                     if (window.location.hostname == 'www.facebook.com') {
 
-                        let post = this._GetOffendingFacebookPost(ent.currentNode)
+                        let post = this._getOffendingFacebookPost(ent.currentNode)
 
                         if (post !== null) this.facebookOffenders.push(post);
                     }
                     else if (ent.currentNode.parentElement) {
 
-                        ent.currentNode.parentElement.innerHTML = this._GetRandomKittenGif()
+                        ent.currentNode.parentElement.innerHTML = this._getRandomKittenGif()
                     }
                 }
             });
 
-            let debauchery = this.CensorDB.GetDebauchery();
+            let debauchery = this.CensorDB.getDebauchery();
 
             Object.keys(debauchery).forEach(trigger => {
                 trigger = trigger.toLowerCase().trim();
@@ -122,18 +126,18 @@ export class CensorService {
 
             offender.previousContents = offender.innerHTML;
 
-            offender.innerHTML = this._GetRandomKittenGif();
+            offender.innerHTML = this._getRandomKittenGif();
         });
     }
 
-    _GetOffendingFacebookPost(offendingNode) {
+    _getOffendingFacebookPost(offendingNode) {
 
         while ((offendingNode = offendingNode.parentElement) && !offendingNode.classList.contains('userContentWrapper'));
 
         return offendingNode;
     }
 
-    _GetRandomKittenGif() {
+    _getRandomKittenGif() {
 
         return `<img id="censor-kitty-photo" src="https://thecatapi.com/api/images/get?format=src&type=jpg&size=large&category=boxes"/>`
     }
