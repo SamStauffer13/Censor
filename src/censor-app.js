@@ -54,37 +54,42 @@ export class Censor {
 
         this.icon.e.onclick = () => {
 
-            this.menu.show();
+            this.service.stop()
 
-            this.icon.hide();
+            this.menu.show()
+
+            this.icon.hide()
         }
 
-        let close = () => {
+        let closeMenu = () => {
 
             this.menu.hide();
 
             this.icon.show();
+
+            this.service.start();
         }
 
-        this.menu.e.onclick = close
+        this.menu.e.onclick = closeMenu       
 
-        this.menu.e.onkeyup = (e) => {
+        this.menu.e.onkeyup = (e) => {            
             const enterKey = 13
             const escapeKey = 27
+            
             switch (e.keyCode) {
                 case enterKey:
                     this.theD.show()
                     this.service.update(this.inputLeft.e.value, this.inputRight.e.value)
-                    break;
+                    break
                 case escapeKey:
-                    close()
-                    break;
+                    closeMenu()
+                    break
                 default: this.theD.hide()
             }
         }
 
-        this.inputLeft.e.onmouseover = () => this.inputLeft.e.focus();
+        this.inputLeft.e.onmouseover = () => this.inputLeft.e.focus()
 
-        this.inputRight.e.onmouseover = () => this.inputRight.e.focus();
+        this.inputRight.e.onmouseover = () => this.inputRight.e.focus()
     }
 }

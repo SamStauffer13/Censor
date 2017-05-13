@@ -1,10 +1,8 @@
-import {CensorDataAccess} from "./censor-data-access.js"
+import { CensorDataAccess } from "./censor-data-access.js"
 
 // todo reduce looping in watch algorithm
 // todo impliment Bias calculator. Highlights trigger words… Gives count of how Biased news source is… 
-// todo fix debounce method
 // todo handle paradoxs
-// todo ignore censor from watching for changes on censor menu
 // todo only replace whole words not just characters in words, so if a user types a, censor shouldn't replace the a in every word
 export class CensorService {
 
@@ -18,11 +16,9 @@ export class CensorService {
 
         this.teenageMutant = new MutationObserver(mutations => {
 
-            let observer = () => mutations.forEach(mutation => this._censorDom());
+            clearTimeout(deboucer)
 
-            clearTimeout(deboucer);
-            
-            deboucer = setTimeout(() => observer(), 1000);
+            deboucer = setTimeout(() => this._censorDom(), 500)
         });
     }
 
@@ -49,23 +45,36 @@ export class CensorService {
 
     update(oldWord, newWord) {
 
-        oldWord = oldWord.toLowerCase();
-        newWord = newWord.toLowerCase();
+        let sanitize = input => {
+            return input ? input.toLowerCase().trim() : ''
+        }
+        oldWord = sanitize(oldWord)
+        newWord = sanitize(newWord)
 
         if (oldWord === '' || newWord === '') return;
 
-        if (newWord === 'kittens') {
-
-            let triggerWarnings = this.CensorDB.getTriggerWarnings();
-
-            if (triggerWarnings.indexOf(oldWord) >= 0) return;
-
-            triggerWarnings.push(oldWord);
-
-            this.CensorDB.updateTriggerWarnings(triggerWarnings);
-
-            return;
+        switch (newWord) {
+            case 'kittens':
+                this._updateTriggerWarnings(oldWord)
+                break
+            case 'sam stauffer':
+                break
+            default: this._updateDebauchery(oldWord, newWord)
         }
+    }
+
+    _updateTriggerWarnings(oldWord) {
+
+        let triggerWarnings = this.CensorDB.getTriggerWarnings();
+
+        if (triggerWarnings.indexOf(oldWord) >= 0) return;
+
+        triggerWarnings.push(oldWord);
+
+        this.CensorDB.updateTriggerWarnings(triggerWarnings);
+    }
+
+    _updateDebauchery(oldWord, newWord) {
 
         let debauchery = this.CensorDB.getDebauchery();
 
@@ -76,9 +85,9 @@ export class CensorService {
 
     delete() {
 
-        this.CensorDB.updateDebauchery(null);
+        this.CensorDB.updateDebauchery('');
 
-        this.CensorDB.updateTriggerWarnings(null);
+        this.CensorDB.updateTriggerWarnings('');
     }
 
     shouldRunOnPageLoad() {
@@ -86,8 +95,12 @@ export class CensorService {
         return this.CensorDB.isCensorEnabled();
     }
 
-    _censorDom(domToParse = document.body) {
-        let ent = document.createTreeWalker(domToParse, NodeFilter.SHOW_TEXT);
+    _scrapeDom() {
+
+    }
+    _censorDom() {
+
+        let ent = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT);
 
         while (ent.nextNode()) {
 

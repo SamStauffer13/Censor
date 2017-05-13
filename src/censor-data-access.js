@@ -14,7 +14,7 @@ export class CensorDataAccess {
 
         let triggerWarnings = localStorage.getItem(this.CensorTriggerWarningKey);
 
-        if (triggerWarnings === null || triggerWarnings === '' || triggerWarnings === 'null') return this.defaultTriggerWarnings;
+        if (triggerWarnings === null || triggerWarnings === '') return this.defaultTriggerWarnings;
 
         return triggerWarnings.split(',');
     }
@@ -22,7 +22,7 @@ export class CensorDataAccess {
     getDebauchery() {
 
         let debauchery = localStorage.getItem(this.CensorDebaucheryKey);
-        if (debauchery === null || debauchery === '' || debauchery === 'null') return this.defaultDebauchery;
+        if (debauchery === null || debauchery === '') return this.defaultDebauchery;
 
         try {
 
@@ -39,26 +39,22 @@ export class CensorDataAccess {
     }
 
     updateTriggerWarnings(triggerWarnings) {
-
-        localStorage.setItem(this.CensorTriggerWarningKey, triggerWarnings);
+        if (triggerWarnings === '') localStorage.removeItem(this.CensorTriggerWarningKey)
+        else localStorage.setItem(this.CensorTriggerWarningKey, triggerWarnings);
     }
 
     updateDebauchery(debauchery) {
-
-        localStorage.setItem(this.CensorDebaucheryKey, JSON.stringify(debauchery));
+        if (debauchery === '') localStorage.removeItem(this.CensorDebaucheryKey)
+        else localStorage.setItem(this.CensorDebaucheryKey, JSON.stringify(debauchery));
     }
 
     isCensorEnabled() {
-
         let status = localStorage.getItem(this.CensorStatusKey);
-
         if (status === null || status === '' || status === 'true') return true;
-
         return false;
     }
 
     updateCensorStatus(isEnabled) {
-
         localStorage.setItem(this.CensorStatusKey, isEnabled);
     }
 }
