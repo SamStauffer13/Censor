@@ -1,5 +1,13 @@
 export class CensorElements {
     constructor() {
+        const components = this.generateHTML()
+        this.icon = new CensorElement(components.icon)
+        this.menu = new CensorElement(components.menu)
+        this.theD = new CensorElement(components.theD)
+        this.inputLeft = new CensorInputElement(components.inputLeft)
+        this.inputRight = new CensorInputElement(components.inputRight)
+    }
+    generateHTML() { // keeps implementation details below the fold
         const styles = {
             icon: 'censor-icon',
             menu: 'censor-menu',
@@ -12,23 +20,19 @@ export class CensorElements {
 
         let template = document.createElement('div')
         document.body.appendChild(template)
-        template.outerHTML = `<img id='${styles.icon}' src='${chrome.extension ? chrome.extension.getURL('./resources/icon-large.png') : './resources/icon-large.png'}' >
+        template.outerHTML = `<img id='${styles.icon}' src='${chrome.extension ? chrome.extension.getURL('./resources/icon-large.png') : 'app/resources/icon-large.png'}' >
             <div id='${styles.menu}'>
                     <span id='${styles.spanLeft}' > Replace<span id=${styles.theD}>D</span> <input id='${styles.inputLeft}' type='text' placeholder='[politics]' /> </span>
                     <span id='${styles.spanRight}'> With <input type='text' placeholder='kittens' id='${styles.inputRight}' /> </span> 
             </div>`
-        this.icon = new CensorElement(styles.icon)
-        this.menu = new CensorElement(styles.menu)
-        this.theD = new CensorElement(styles.theD)
-        this.inputLeft = new CensorElement(styles.inputLeft)
-        this.inputRight = new CensorElement(styles.inputRight)
+
+        return styles
     }
 }
 
 class CensorElement {
-    constructor(id) {
+    constructor(id) {        
         this.e = document.getElementById(id)
-        this.e.onclick = (e) => e.stopPropagation()
         this.isShowing = this.e.style.display != 'none'
     }
     show() {
@@ -38,3 +42,26 @@ class CensorElement {
         if (this.isShowing) this.e.style.display = 'none'
     }
 }
+
+class CensorInputElement extends CensorElement {
+    constructor(id) {        
+        super(id)        
+        this.e.onmouseover = () => this.e.focus()
+    }
+    clear() {
+        this.e.classList.add('fade-out') // 1 second
+        setTimeout(() => {
+            this.e.classList.remove('fade-out')
+            this.e.value = ''
+        }, 1000)
+    }
+    next(value) {
+        this.e.classList.add('swipe-right') // todo animate in the next value
+        this.e.value = value
+    }    
+    previous(value){
+        this.e.classList.add('swipe-left') // todo animate in the next value
+        this.e.value = value
+    }
+}
+

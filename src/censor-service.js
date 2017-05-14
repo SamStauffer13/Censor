@@ -1,8 +1,6 @@
 import { CensorDataAccess } from "./censor-data-access.js"
 
-// todo reduce looping in watch algorithm
 // todo impliment Bias calculator. Highlights trigger words… Gives count of how Biased news source is… 
-// todo handle paradoxs
 // todo only replace whole words not just characters in words, so if a user types a, censor shouldn't replace the a in every word
 export class CensorService {
 
@@ -10,7 +8,7 @@ export class CensorService {
 
         this.CensorDB = new CensorDataAccess();
 
-        this.facebookOffenders = [];
+        this.correctedNodes = [];
 
         let deboucer = null;
 
@@ -18,10 +16,13 @@ export class CensorService {
 
             clearTimeout(deboucer)
 
-            deboucer = setTimeout(() => this._censorDom(), 500)
+            deboucer = setTimeout(() => { this._censorDom()}, 500)
         });
     }
+    shouldRunOnPageLoad() {
 
+        return this.CensorDB.isCensorEnabled();
+    }
     start() {
 
         this._censorDom();
@@ -30,128 +31,74 @@ export class CensorService {
 
         this.CensorDB.updateCensorStatus(true);
     }
-
     stop() {
 
         this.teenageMutant.disconnect();
 
         this.CensorDB.updateCensorStatus(false);
 
-        this.facebookOffenders.forEach((offender) => {
+        this.correctedNodes.forEach((offender) => {
 
             offender.innerHTML = offender.previousContents;
         });
     }
-
     update(oldWord, newWord) {
 
-        let sanitize = input => {
-            return input ? input.toLowerCase().trim() : ''
-        }
-        oldWord = sanitize(oldWord)
-        newWord = sanitize(newWord)
+        oldWord = this._sanitize(oldWord)
 
-        if (oldWord === '' || newWord === '') return;
+        newWord = this._sanitize(newWord)
 
-        switch (newWord) {
-            case 'kittens':
-                this._updateTriggerWarnings(oldWord)
-                break
-            case 'sam stauffer':
-                break
-            default: this._updateDebauchery(oldWord, newWord)
-        }
+        if (oldWord === '' || newWord === '') return        
+
+        let triggerWarnings = this.CensorDB.getTriggerWarnings()
+
+        triggerWarnings[oldWord] = newWord
+
+        this.CensorDB.updateTriggerWarnings(triggerWarnings)
     }
-
-    _updateTriggerWarnings(oldWord) {
-
-        let triggerWarnings = this.CensorDB.getTriggerWarnings();
-
-        if (triggerWarnings.indexOf(oldWord) >= 0) return;
-
-        triggerWarnings.push(oldWord);
-
-        this.CensorDB.updateTriggerWarnings(triggerWarnings);
-    }
-
-    _updateDebauchery(oldWord, newWord) {
-
-        let debauchery = this.CensorDB.getDebauchery();
-
-        debauchery[oldWord] = newWord;
-
-        this.CensorDB.updateDebauchery(debauchery);
-    }
-
     delete() {
-
-        this.CensorDB.updateDebauchery('');
-
-        this.CensorDB.updateTriggerWarnings('');
-    }
-
-    shouldRunOnPageLoad() {
-
-        return this.CensorDB.isCensorEnabled();
-    }
-
-    _scrapeDom() {
-
+        this.CensorDB.updateTriggerWarnings(null)
     }
     _censorDom() {
 
-        let ent = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT);
+        let ent = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT)
+
+        const triggerWarnings = this.CensorDB.getTriggerWarnings()
 
         while (ent.nextNode()) {
 
-            let content = ent.currentNode.nodeValue.toLowerCase().trim();
+            let content = this._sanitize(ent.currentNode.nodeValue)
 
-            let triggerWarnings = this.CensorDB.getTriggerWarnings();
+            Object.keys(triggerWarnings).forEach(trigger => {
 
-            triggerWarnings.forEach((triggerWarning) => {
+                const replacement = triggerWarnings[trigger]
 
-                if (content.includes(triggerWarning) && ent.currentNode) {
+                if (content.includes(trigger)) {
 
-                    if (window.location.hostname == 'www.facebook.com') {
+                    if (replacement === 'kittens' && window.location.hostname === 'www.facebook.com') {
 
+                        // todo expand the undo functionality to non facebook pages
                         let post = this._getOffendingFacebookPost(ent.currentNode)
-
-                        if (post !== null) this.facebookOffenders.push(post);
+                        post.previousContents = offender.innerHTML
+                        post.innerHTML = this._getRandomKittenGif()
+                        this.correctedNodes.push(post)
                     }
-                    else if (ent.currentNode.parentElement) {
-
-                        ent.currentNode.parentElement.innerHTML = this._getRandomKittenGif()
-                    }
+                    else { ent.currentNode.nodeValue = content.replace(trigger, replacement) }
                 }
             });
-
-            let debauchery = this.CensorDB.getDebauchery();
-
-            Object.keys(debauchery).forEach(trigger => {
-                trigger = trigger.toLowerCase().trim();
-                if (content.includes(trigger)) ent.currentNode.nodeValue = content.replace(trigger, debauchery[trigger]);
-            });
         }
-
-        this.facebookOffenders.forEach((offender) => {
-
-            if (offender.firstChild && offender.firstChild.id === 'censor-kitty-photo') return; // todo, figure out why there is excessive looping
-
-            offender.previousContents = offender.innerHTML;
-
-            offender.innerHTML = this._getRandomKittenGif();
-        });
     }
-
-    _getOffendingFacebookPost(offendingNode) {
+    _sanitize(input) {
+         return input ? input.toLowerCase().trim() : ''
+    }
+    _getOffendingFacebookPost(offendingNode) { // abstracted behind a method so it's easy to swap out dom crawling mechanism
 
         while ((offendingNode = offendingNode.parentElement) && !offendingNode.classList.contains('userContentWrapper'));
 
         return offendingNode;
     }
+    _getRandomKittenGif() { // abstracted behind a method so it's easy to swap out kitten photo providers
 
-    _getRandomKittenGif() {
-
-        return `<img id="censor-kitty-photo" src="https://thecatapi.com/api/images/get?format=src&type=jpg&size=large&category=boxes"/>`
+         return `<img id="censor-kitty-photo" src="https://thecatapi.com/api/images/get?format=src&type=jpg&size=large&category=boxes"/>`
     }
 }

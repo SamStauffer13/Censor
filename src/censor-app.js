@@ -1,4 +1,7 @@
 // uglify + nodesass
+// update delete functonality to remove only the selected setting
+// update, clicking right or left keys swipes through settings
+// update task runner with correct map files 
 // https://chrome.google.com/webstore/detail/censor/nhmdjmcfaiodoofhminppdjdhfifflbf
 'use strict'
 
@@ -25,22 +28,28 @@ export class Censor {
             this.service.start();
         }
 
-        if (chrome.runtime.onMessage) chrome.runtime.onMessage.addListener((request) => this.onBrowserIconClick(request.enableCensor));
-
         this.setupCensorMenu();
+
+        if (chrome.runtime.onMessage) chrome.runtime.onMessage.addListener((request) => this.onBrowserIconClick(request.enableCensor));
     }
 
     onBrowserIconClick(enableCensor) {
 
-        if (enableCensor === true) {
+        if (this.menu.isShowing === true) {
+
+            this.inputLeft.clear()
+
+            this.inputRight.clear()
+
+            this.service.delete()
+
+        } else if (enableCensor === true) {
 
             this.icon.show();
 
             this.service.start();
 
         } else if (enableCensor === false) {
-
-            if (this.menu.isShowing === true) this.service.delete()
 
             this.icon.hide();
 
@@ -70,12 +79,12 @@ export class Censor {
             this.service.start();
         }
 
-        this.menu.e.onclick = closeMenu       
-
-        this.menu.e.onkeyup = (e) => {            
+        // todo, leverage the chrome api instead of brute force js
+        this.menu.e.onkeyup = (e) => {
             const enterKey = 13
             const escapeKey = 27
-            
+            const leftArrowKey = 37
+            const rightArrowKey = 39
             switch (e.keyCode) {
                 case enterKey:
                     this.theD.show()
@@ -87,9 +96,5 @@ export class Censor {
                 default: this.theD.hide()
             }
         }
-
-        this.inputLeft.e.onmouseover = () => this.inputLeft.e.focus()
-
-        this.inputRight.e.onmouseover = () => this.inputRight.e.focus()
     }
 }
