@@ -2,12 +2,12 @@
   "name": "censor",
   "version": "3.0.0",
   "scripts": {
-    "start": "npm run build | live-server --entry-file=spec-runner.html --wait=500",
+    "start": "npm run build | live-server --entry-file=integration-test-runner.html --wait=500",
     "lint": "eslint src/",
     "build": "npm run build:content | npm run build:background",
-    "build:content": "watchify -t babelify src/content-scripts/content-script.js -p [minifyify --no-map]  -o app/content-script.js",
+    "build:content": "watchify -t babelify src/content-script.js -p [minifyify --no-map]  -o app/content-script.js",
     "build:background": "watchify -t babelify src/background.js -p [minifyify --no-map] -o app/background.js",
-    "build:css": "watchify src/content-scripts/content-script.css -o app/content-app.css"
+    "build:css": "watchify src/content-script.css -o app/content-app.css"
   },
   "dependencies": {},
   "devDependencies": {

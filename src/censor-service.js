@@ -2,6 +2,8 @@ import { CensorDataAccess } from "./censor-data-access.js"
 
 // todo impliment Bias calculator. Highlights trigger words… Gives count of how Biased news source is… 
 // todo only replace whole words not just characters in words, so if a user types a, censor shouldn't replace the a in every word
+// todo expand the undo functionality to non facebook pages
+
 export class CensorService {
 
     constructor() {
@@ -77,7 +79,6 @@ export class CensorService {
 
                     if (replacement === 'kittens' && window.location.hostname === 'www.facebook.com') {
 
-                        // todo expand the undo functionality to non facebook pages
                         let post = this._getOffendingFacebookPost(ent.currentNode)
                         post.previousContents = offender.innerHTML
                         post.innerHTML = this._getRandomKittenGif()

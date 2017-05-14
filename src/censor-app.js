@@ -1,20 +1,20 @@
 // uglify + nodesass
+// update task runner with correct map files so console debugging isn't a nightmare
 // update delete functonality to remove only the selected setting
 // update, clicking right or left keys swipes through settings
-// update task runner with correct map files 
 // https://chrome.google.com/webstore/detail/censor/nhmdjmcfaiodoofhminppdjdhfifflbf
 'use strict'
 
 import { CensorService } from "./censor-service.js"
 
-import { CensorElements } from "./censor-elements.js"
+import { CensorHTMLComponents } from "./censor-html-components.js"
 
 export class Censor {
 
     constructor() {
 
         this.service = new CensorService()
-        let elements = new CensorElements()
+        let elements = new CensorHTMLComponents()
         this.icon = elements.icon
         this.menu = elements.menu
         this.theD = elements.theD
