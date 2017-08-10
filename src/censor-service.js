@@ -27,6 +27,7 @@ export class CensorService {
     }
     start() {
 
+        // todo I think this might not be needed
         this._censorDom();
 
         this.teenageMutant.observe(document.body, { childList: true });
@@ -62,7 +63,6 @@ export class CensorService {
         this.CensorDB.updateTriggerWarnings(null)
     }
     _censorDom() {
-
         let ent = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT)
 
         const triggerWarnings = this.CensorDB.getTriggerWarnings()
@@ -74,13 +74,13 @@ export class CensorService {
             Object.keys(triggerWarnings).forEach(trigger => {
 
                 const replacement = triggerWarnings[trigger]
-
+                
                 if (content.includes(trigger)) {
-
+                    
                     if (replacement === 'kittens' && window.location.hostname === 'www.facebook.com') {
-
+                        
                         let post = this._getOffendingFacebookPost(ent.currentNode)
-                        post.previousContents = offender.innerHTML
+                        post.previousContents = post.innerHTML
                         post.innerHTML = this._getRandomKittenGif()
                         this.correctedNodes.push(post)
                     }
@@ -94,7 +94,7 @@ export class CensorService {
     }
     _getOffendingFacebookPost(offendingNode) { // abstracted behind a method so it's easy to swap out dom crawling mechanism
 
-        while ((offendingNode = offendingNode.parentElement) && !offendingNode.classList.contains('userContentWrapper'));
+        while ((offendingNode = offendingNode.parentElement) && !offendingNode.classList.contains('fbUserPost'))
 
         return offendingNode;
     }

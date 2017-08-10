@@ -3,6 +3,7 @@
 // update delete functonality to remove only the selected setting
 // update, clicking right or left keys swipes through settings
 // https://chrome.google.com/webstore/detail/censor/nhmdjmcfaiodoofhminppdjdhfifflbf
+
 'use strict'
 
 import { CensorService } from "./censor-service.js"
@@ -21,7 +22,8 @@ export class Censor {
         this.inputLeft = elements.inputLeft
         this.inputRight = elements.inputRight
 
-        if (this.service.shouldRunOnPageLoad() === true) {
+        // todo, figure out why this gets out of sync
+        if (true || this.service.shouldRunOnPageLoad() === true) {
 
             this.icon.show();
 
@@ -47,7 +49,7 @@ export class Censor {
 
             this.icon.show();
 
-            this.service.start();
+            // this.service.start();
 
         } else if (enableCensor === false) {
 
@@ -55,7 +57,7 @@ export class Censor {
 
             this.menu.hide();
 
-            this.service.stop();
+            // this.service.stop();
         }
     }
 
@@ -63,7 +65,7 @@ export class Censor {
 
         this.icon.e.onclick = () => {
 
-            this.service.stop()
+            // this.service.stop()
 
             this.menu.show()
 
@@ -76,7 +78,7 @@ export class Censor {
 
             this.icon.show();
 
-            this.service.start();
+            // this.service.start();
         }
 
         // todo, leverage the chrome api instead of brute force js
@@ -88,7 +90,7 @@ export class Censor {
             switch (e.keyCode) {
                 case enterKey:
                     this.theD.show()
-                    this.service.update(this.inputLeft.e.value, this.inputRight.e.value)
+                    // this.service.update(this.inputLeft.e.value, this.inputRight.e.value)
                     break
                 case escapeKey:
                     closeMenu()

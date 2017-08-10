@@ -24,7 +24,7 @@ export class CensorHTMLComponents {
 
         let template = document.createElement('div')
         document.body.appendChild(template)
-        template.outerHTML = `<img id='${styles.icon}' src='${chrome.extension ? chrome.extension.getURL('./resources/icon-large.png') : 'app/resources/icon-large.png'}' >
+        template.outerHTML = `<img id='${styles.icon}' src='${chrome.extension ? chrome.extension.getURL('resources/icon-large.png') : 'app/resources/icon-large.png'}' >
             <div id='${styles.menu}'>
                     <span id='${styles.spanLeft}' > Replace<span id=${styles.theD}>D</span> <input id='${styles.inputLeft}' type='text' placeholder='[politics]' /> </span>
                     <span id='${styles.spanRight}'> With <input type='text' placeholder='kittens' id='${styles.inputRight}' /> </span> 
